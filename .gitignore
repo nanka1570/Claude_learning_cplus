@@ -1,0 +1,26 @@
+# Visual Studio
+.vs/
+x64/
+Debug/
+Release/
+*.user
+*.suo
+*.pdb
+*.obj
+*.pch
+*.ipch
+*.ilk
+*.exp
+*.idb
+*.sdf
+*.opensdf
+*.db
+*.opendb
+*.VC.db
+*.VC.opendb
+
+# ビルド成果物
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
