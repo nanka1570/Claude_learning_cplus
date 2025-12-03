@@ -11,7 +11,6 @@
 #include <Gdiplus.h>
 #include <Gdiplusimaging.h>
 
-
 // CImageDlg ダイアログ
 IMPLEMENT_DYNAMIC(CImageDlg, CDialogEx)
 
@@ -32,6 +31,10 @@ BEGIN_MESSAGE_MAP(CImageDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_FLIP_LEFT_RIGHT, &CImageDlg::OnBnClickedButtonFlipLeftRight)
 	ON_BN_CLICKED(IDC_BUTTON_ROTATE_RIGHT, &CImageDlg::OnBnClickedButtonRotateRight)
 	ON_BN_CLICKED(IDC_BUTTON_ROTATE_LEFT, &CImageDlg::OnBnClickedButtonRotateLeft)
+	ON_WM_SIZING()
+	ON_WM_SIZE()
+	ON_WM_SIZE()
+	ON_WM_SIZING()
 END_MESSAGE_MAP()
 
 //ビットマップの表示に必要な値をセットする
@@ -143,7 +146,7 @@ void CImageDlg::DrawRotate(const BUTTONS button)
 	auto newHeight = 0;
 
 	//画像が横になる場合
-	if (button == BUTTON_90 || button == BUTTON_270 || button == BUTTON_VERTICAL_REVERSE) {
+	if (button == BUTTON_90 || button == BUTTON_270) {
 		newWidth = srcHeight;
 		newHeight = srcWidth;
 	}
@@ -171,14 +174,15 @@ void CImageDlg::DrawRotate(const BUTTONS button)
 	auto hDC = m_imageTemp.GetDC();
 	POINT points[3] = {};
 	if (button == BUTTON_90) {
-		points[0] = { 0, 1 };
-		points[1] = { 0, 0 };
-		points[2] = { 1, 1 };
-	}
-	else if (button == BUTTON_270) {
 		points[0] = { 1, 0 };
 		points[1] = { 1, 1 };
 		points[2] = { 0, 0 };
+
+	}
+	else if (button == BUTTON_270) {
+		points[0] = { 0, 1 };
+		points[1] = { 0, 0 };
+		points[2] = { 1, 1 };
 	}
 	else if (button == BUTTON_HORIZONTAL_REVERSE) {
 		points[0] = { 0, 1 };
@@ -192,8 +196,23 @@ void CImageDlg::DrawRotate(const BUTTONS button)
 	}
 
 	for (int i = 0; i < 3; ++i) {
-		points[i].x *= (newWidth - 1);
-		points[i].y *= (newHeight - 1);
+		points[i].x *= newWidth;
+		points[i].y *= newHeight;
+
+		switch (button) {
+		case BUTTON_180:
+			points[i].x -= 1;
+			points[i].y -= 1;
+			break;
+		case BUTTON_HORIZONTAL_REVERSE:
+			points[i].y -= 1;
+			break;
+		case BUTTON_VERTICAL_REVERSE:
+			points[i].x -= 1;
+		default:
+			break;
+		}
+
 	}
 	m_imageView.PlgBlt(hDC, points);
 	m_imageTemp.ReleaseDC();
@@ -205,6 +224,7 @@ void CImageDlg::DrawRotate(const BUTTONS button)
 
 	hDC = m_imageView.GetDC();
 	//m_imageTemp.PlgBlt(hDC, nullptr);
+	m_imageTemp.BitBlt(hDC, 0, 0, SRCCOPY);
 	m_imageView.ReleaseDC();
 
 	m_ctrlBitmap2.SetBitmap(m_imageView);
@@ -264,3 +284,17 @@ void CImageDlg::PostNcDestroy()
 	delete this;
 }
 
+
+void CImageDlg::OnSize(UINT nType, int cx, int cy)
+{
+	CDialogEx::OnSize(nType, cx, cy);
+
+	// TODO: ここにメッセージ ハンドラー コードを追加します。
+}
+
+void CImageDlg::OnSizing(UINT fwSide, LPRECT pRect)
+{
+	CDialogEx::OnSizing(fwSide, pRect);
+
+	// TODO: ここにメッセージ ハンドラー コードを追加します。
+}
