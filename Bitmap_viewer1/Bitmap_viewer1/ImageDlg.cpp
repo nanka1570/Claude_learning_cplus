@@ -86,6 +86,8 @@ LRESULT CImageDlg::OnDrawBitmap(WPARAM wParam, LPARAM lParam)
 	////m_image.Destroy();
 	////m_ctrlBitmap2.SetBitmap(m_imageView);
 	updateBitmapWindow();
+	//デバッグ
+	//m_bImageLoaded = true;B
 	return 0;
 	printf("");
 }
@@ -279,7 +281,14 @@ void CImageDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
 
+	////ビットマップが読み込まれていなければ何もしない
+	//if (!m_bImageLoaded)
+	//	return;
+	//ビットマップがNULLなら何もしない
 	if (m_image.IsNull())
+		return;
+	//コントロールが作成されていなければ何もしない
+	if (m_ctrlBitmap2.GetSafeHwnd() == NULL)
 		return;
 
 	updateBitmapWindow();
@@ -302,14 +311,29 @@ void CImageDlg::updateBitmapWindow()
 	//描画されていなければ何もしない
 	if (newWidth <= 0 || newHeight <= 0)
 		return;
+	
+	//int bpp = m_imageView.GetBPP();
+
+	// ★ここにデバッグコードを追加
+	CString msg;
+	msg.Format(_T("Before Destroy: m_imageView.IsNull() = %d\n"), m_imageView.IsNull());
+	OutputDebugString(msg);
+
+
 
 	if (!m_imageView.IsNull())
 		m_imageView.Destroy();
 
-	m_imageView.Create(newWidth, newHeight, m_imageView.GetBPP());
+	//m_imageView.Create(newWidth, newHeight, m_imageView.GetBPP());
+	m_imageView.Create(newWidth, newHeight, m_image.GetBPP());
+
+	msg.Format(_T("After Destroy: m_imageView.IsNull() = %d\n"), m_imageView.IsNull());
+	OutputDebugString(msg);
+
+
 
 	HDC hDC = m_imageView.GetDC();
-	m_imageView.StretchBlt(hDC, 0, 0, newWidth, newHeight, SRCCOPY);
+	m_image.StretchBlt(hDC, 0, 0, newWidth, newHeight, SRCCOPY);
 	m_imageView.ReleaseDC();
 
 	m_ctrlBitmap2.SetBitmap(m_imageView);

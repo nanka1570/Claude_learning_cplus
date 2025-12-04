@@ -143,5 +143,6 @@ protected:
 //
 //	//Šg‘å—¦
 //	double m_zoomRation = 1.0;
-
+	//protected:
+	//	bool m_bImageLoaded = false;  // ‰æ‘œ“Ç‚İ‚İŠ®—¹ƒtƒ‰ƒO
 };
