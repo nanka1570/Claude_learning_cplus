@@ -31,8 +31,6 @@ BEGIN_MESSAGE_MAP(CImageDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_FLIP_LEFT_RIGHT, &CImageDlg::OnBnClickedButtonFlipLeftRight)
 	ON_BN_CLICKED(IDC_BUTTON_ROTATE_RIGHT, &CImageDlg::OnBnClickedButtonRotateRight)
 	ON_BN_CLICKED(IDC_BUTTON_ROTATE_LEFT, &CImageDlg::OnBnClickedButtonRotateLeft)
-	ON_WM_SIZING()
-	ON_WM_SIZE()
 	ON_WM_SIZE()
 	ON_WM_SIZING()
 END_MESSAGE_MAP()
@@ -64,35 +62,30 @@ LRESULT CImageDlg::OnDrawBitmap(WPARAM wParam, LPARAM lParam)
 	m_image.Load(bitmapFilename.native().c_str());
 	// m_ctrlBitmap2.SetBitmap(m_image);
 
-	if (!m_imageView.IsNull())
+	/*if (!m_imageView.IsNull())
 	{
 		m_imageView.Destroy();
-	}
-	srcWidth = m_image.GetWidth();
-	srcHeight = m_image.GetHeight();
-	targetWidth = srcWidth;
-	targetHeight = srcHeight;
-	bpp = m_image.GetBPP();
-	//描画するキャンバスを用意 Create(x, y, bpp, 0)
-	m_imageView.Create(targetWidth, targetHeight, bpp, 0);
+	}*/
+	//srcWidth = m_image.GetWidth();
+	//srcHeight = m_image.GetHeight();
+	//targetWidth = srcWidth;
+	//targetHeight = srcHeight;
+	//bpp = m_image.GetBPP();
+	////描画するキャンバスを用意 Create(x, y, bpp, 0)
+	//m_imageView.Create(targetWidth, targetHeight, bpp, 0);
 
-	//POINT points[3] = {
-	 // { 0, 0 },
-	 // { targetWidth - 1, 0 },
-	 // { 0, targetHeight - 1 }
-	 //};
-	POINT points[3] = {};
-	points[0] = { 0, 0 };
-	points[1] = { targetWidth - 1, 0 };
-	points[2] = { 0, targetHeight - 1 };
+	//POINT points[3] = {};
+	//points[0] = { 0, 0 };
+	//points[1] = { targetWidth - 1, 0 };
+	//points[2] = { 0, targetHeight - 1 };
 
-	m_image.PlgBlt(m_imageView.GetDC(), points);
-	//m_image.BitBlt(m_imageView.GetDC(), points);
-	m_imageView.ReleaseDC();
+	//m_image.PlgBlt(m_imageView.GetDC(), points);
+	////m_image.BitBlt(m_imageView.GetDC(), points);
+	//m_imageView.ReleaseDC();
 
-	//m_image.Destroy();
-	m_ctrlBitmap2.SetBitmap(m_imageView);
-
+	////m_image.Destroy();
+	////m_ctrlBitmap2.SetBitmap(m_imageView);
+	updateBitmapWindow();
 	return 0;
 	printf("");
 }
@@ -102,8 +95,9 @@ BOOL CImageDlg::OnInitDialog()
 {
 	CDialogEx::OnInitDialog();
 
+	//ダイアログを表示
 	ShowWindow(SW_SHOW);
-
+	//ビットマップを描画
 	DrawBitmap();
 
 	printf("");
@@ -232,10 +226,6 @@ void CImageDlg::DrawRotate(const BUTTONS button)
 	//m_imageTemp.Destroy();
 }
 
-//bool CImageDlg::BitmapJudge()
-//{
-// return false;
-//}
 
 //上下反転ボタン
 void CImageDlg::OnBnClickedButtonFlipUpsideDown()
@@ -289,12 +279,41 @@ void CImageDlg::OnSize(UINT nType, int cx, int cy)
 {
 	CDialogEx::OnSize(nType, cx, cy);
 
-	// TODO: ここにメッセージ ハンドラー コードを追加します。
+	if (m_image.IsNull())
+		return;
+
+	updateBitmapWindow();
 }
 
 void CImageDlg::OnSizing(UINT fwSide, LPRECT pRect)
 {
 	CDialogEx::OnSizing(fwSide, pRect);
 
-	// TODO: ここにメッセージ ハンドラー コードを追加します。
+}
+
+void CImageDlg::updateBitmapWindow()
+{
+	CRect rectClient;
+	GetClientRect(&rectClient);
+
+	int newWidth = rectClient.Width();
+	int newHeight = rectClient.Height();
+
+	//描画されていなければ何もしない
+	if (newWidth <= 0 || newHeight <= 0)
+		return;
+
+	if (!m_imageView.IsNull())
+		m_imageView.Destroy();
+
+	m_imageView.Create(newWidth, newHeight, m_imageView.GetBPP());
+
+	HDC hDC = m_imageView.GetDC();
+	m_imageView.StretchBlt(hDC, 0, 0, newWidth, newHeight, SRCCOPY);
+	m_imageView.ReleaseDC();
+
+	m_ctrlBitmap2.SetBitmap(m_imageView);
+
+	m_ctrlBitmap2.MoveWindow(&rectClient);
+
 }
