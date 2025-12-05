@@ -4,13 +4,9 @@
 #include "pch.h"
 #include "Resource.h"
 #include "Bitmap_viewer1Dlg.h"
-//#include "AboutDlg.h"
-//#include "afxdialogex.h"
 #include "ImageDlg.h"
 #include <vector>
-#include <Gdiplus.h>
 #include <Gdiplusimaging.h>
-#include <mciapi.h>
 
 // CImageDlg ダイアログ
 IMPLEMENT_DYNAMIC(CImageDlg, CDialogEx)
@@ -27,11 +23,8 @@ CImageDlg::~CImageDlg()
 
 BEGIN_MESSAGE_MAP(CImageDlg, CDialogEx)
 	ON_MESSAGE(CBitmapviewer1Dlg::WM_DRAWBITMAP, OnDrawBitmap)
-	ON_BN_CLICKED(IDC_BUTTON_BITMAPFILE_SAVE, &CImageDlg::OnBnClickedButtonBitmapfileSave)
-	ON_BN_CLICKED(IDC_BUTTON_FLIP_UPSIDE_DOWN, &CImageDlg::OnBnClickedButtonFlipUpsideDown)
-	ON_BN_CLICKED(IDC_BUTTON_FLIP_LEFT_RIGHT, &CImageDlg::OnBnClickedButtonFlipLeftRight)
-	ON_BN_CLICKED(IDC_BUTTON_ROTATE_RIGHT, &CImageDlg::OnBnClickedButtonRotateRight)
-	ON_BN_CLICKED(IDC_BUTTON_ROTATE_LEFT, &CImageDlg::OnBnClickedButtonRotateLeft)
+	ON_MESSAGE(CBitmapviewer1Dlg::WM_ROTATEBITMAP, OnDrawRotate)
+	ON_MESSAGE(CBitmapviewer1Dlg::WM_SAVEBITMAPFILE, OnSaveBitmapFile)
 	ON_WM_SIZING()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
@@ -53,18 +46,6 @@ BOOL CImageDlg::OnInitDialog()
 	m_imageTemp.Destroy();
 
 	DrawBitmap();
-	//ShowWindow(SW_SHOW);
-
-   ////初期表示のサイズを設定
-   //if (IsWindow(m_ctrlBitmap2.GetSafeHwnd()))
-   //{
-
-   // // ダイアログのサイズを取得
-   // GetClientRect(&InitializeRect);
-
-   // // ダイアログに合わせてリストビューのサイズ変更(初期)
-   // m_ctrlBitmap2.MoveWindow(0, 0, InitializeRect.Width(), InitializeRect.Height());
-   //}
 
 	printf("");
 	return TRUE;
@@ -72,12 +53,12 @@ BOOL CImageDlg::OnInitDialog()
 
 void CImageDlg::OnOK()
 {
-	CDialog::OnOK();
+	//CDialog::OnOK();
 }
 
 void CImageDlg::OnCancel()
 {
-	CDialog::OnCancel();
+	//CDialog::OnCancel();
 }
 
 void CImageDlg::PostNcDestroy()
@@ -90,17 +71,6 @@ void CImageDlg::PostNcDestroy()
 void CImageDlg::OnSizing(UINT fwSide, LPRECT pRect)
 {
 	CDialogEx::OnSizing(fwSide, pRect);
-
-	//CRect updatedRect;
-
-	//CRect OnSizingRect;
-	 //GetClientRect(OnSizingRect);
-	 //resizeBitmap(OnSizingRect.Width(), OnSizingRect.Height());
-
-	// ビットマップのサイズを変更する
-	 //resizeBitmap();
-
-	//ビットマップ以外のオブジェクトの位置を相対的に移動する
 }
 
 void CImageDlg::OnSize(UINT nType, int cx, int cy)
@@ -114,18 +84,6 @@ void CImageDlg::OnSize(UINT nType, int cx, int cy)
 
 }
 
-//ビットマップの表示に必要な値をセットする
-//void CImageDlg::setBitmap(int m_offset, int m_width, int m_height, int m_bits, uint8_t* pImage)
-//{
-// //m_offset = this.m_offset;
-// m_newOffset = m_offset;
-// m_newWidth = m_width;
-// m_newHeight = m_height;
-// m_newBits = m_bits;
-// m_pImage = pImage;
-//
-// printf("");
-//}
 
 //Bitmap_viewer1Dlg.cppからもらったファイルをセットする
 void CImageDlg::setBitmapFile(std::filesystem::path filename)
@@ -161,14 +119,6 @@ LRESULT CImageDlg::OnDrawBitmap(WPARAM wParam, LPARAM lParam)
 	//m_image.StretchBlt(hDC, 0, 0, targetWidth, targetHeight, SRCCOPY);
 	m_imageView.ReleaseDC();
 
-	//POINT points[3] = {};
-	 //points[0] = { 0, 0 };
-	 //points[1] = { targetWidth - 1, 0 };
-	 //points[2] = { 0, targetHeight - 1 };
-
-	//////デフォルト位置でコピー
-	 //m_image.PlgBlt(m_imageView.GetDC(), points);
-
 	 //リサイズ
 	resizeBitmap(targetWidth, targetHeight);
 
@@ -176,11 +126,32 @@ LRESULT CImageDlg::OnDrawBitmap(WPARAM wParam, LPARAM lParam)
 
 	ShowWindow(SW_SHOW);
 
-	//m_ctrlBitmap2.SetBitmap(nullptr);
-
 	return 0;
 	printf("");
 }
+
+
+LRESULT CImageDlg::OnDrawRotate(WPARAM wParam, LPARAM lParam)
+{
+	BUTTONS button = static_cast<BUTTONS>(wParam);
+	DrawRotate(button);
+	return 0;
+}
+
+LRESULT CImageDlg::OnSaveBitmapFile(WPARAM wParam, LPARAM lParam)
+{
+	CFileDialog dlg(FALSE);
+	if (dlg.DoModal() == IDOK)
+	{
+		m_strSaveBitmapFilename = dlg.GetPathName();
+
+		UpdateData(FALSE);
+
+		ImageSave();
+	}
+	return 0;
+}
+
 
 void CImageDlg::resizeBitmap(const int width, const int height)
 {
@@ -242,23 +213,6 @@ void CImageDlg::resizeBitmap(const int width, const int height)
 	m_ctrlBitmap2.ShowWindow(SW_SHOW);
 }
 
-//void CImageDlg::objectCoordinates()
-//{
-// //今使っていない
-// CRect rectBitmap;
-// const auto targetWidth = rectBitmap.Width();
-// const auto targetHeight = rectBitmap.Height();
-//
-// if (!m_imageView.IsNull()) {
-// m_imageView.Destroy();
-// }
-// m_imageView.Create(targetWidth, targetHeight, m_image.GetBPP());
-//
-// HDC hDC = m_imageView.GetDC();
-// m_image.StretchBlt(hDC, 0, 0, targetWidth, targetHeight, SRCCOPY);
-// m_imageView.ReleaseDC();
-// m_ctrlBitmap2.SetBitmap(m_imageView);
-//}
 
 //DrawBitmap使用
 void CImageDlg::DrawBitmap()
@@ -267,20 +221,20 @@ void CImageDlg::DrawBitmap()
 	return;
 }
 
-//「名前を付けて保存」する
-void CImageDlg::OnBnClickedButtonBitmapfileSave()
-{
-	CFileDialog dlg(FALSE);
-	if (dlg.DoModal() == IDOK)
-	{
-		m_strSaveBitmapFilename = dlg.GetPathName();
-
-		UpdateData(FALSE);
-
-		ImageSave();
-	}
-	printf("");
-}
+////「名前を付けて保存」する
+//void CImageDlg::OnBnClickedButtonBitmapfileSave()
+//{
+//	CFileDialog dlg(FALSE);
+//	if (dlg.DoModal() == IDOK)
+//	{
+//		m_strSaveBitmapFilename = dlg.GetPathName();
+//
+//		UpdateData(FALSE);
+//
+//		ImageSave();
+//	}
+//	printf("");
+//}
 
 void CImageDlg::ImageSave()
 {
@@ -379,28 +333,4 @@ void CImageDlg::DrawRotate(const BUTTONS button)
 	m_ctrlBitmap2.SetBitmap(m_imageView);
 
 	//m_imageTemp.Destroy();
-}
-
-//上下反転ボタン
-void CImageDlg::OnBnClickedButtonFlipUpsideDown()
-{
-	DrawRotate(BUTTON_HORIZONTAL_REVERSE);
-}
-
-//左右反転ボタン
-void CImageDlg::OnBnClickedButtonFlipLeftRight()
-{
-	DrawRotate(BUTTON_VERTICAL_REVERSE);
-}
-
-//右に90°回転
-void CImageDlg::OnBnClickedButtonRotateRight()
-{
-	DrawRotate(BUTTON_90);
-}
-
-//左に90°回転
-void CImageDlg::OnBnClickedButtonRotateLeft()
-{
-	DrawRotate(BUTTON_270);
 }

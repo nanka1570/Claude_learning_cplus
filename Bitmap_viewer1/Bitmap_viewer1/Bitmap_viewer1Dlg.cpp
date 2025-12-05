@@ -28,6 +28,11 @@ BEGIN_MESSAGE_MAP(CBitmapviewer1Dlg, CDialogEx)
     ON_WM_PAINT()
     ON_WM_QUERYDRAGICON()
     ON_BN_CLICKED(IDC_BUTTON_BITMAPFILE_OPEN, &CBitmapviewer1Dlg::OnBnClickedBitmapFileOpen)
+    ON_BN_CLICKED(IDC_BUTTON_ROTATE_LEFT, &CBitmapviewer1Dlg::OnBnClickedButtonRotateLeft)
+    ON_BN_CLICKED(IDC_BUTTON_ROTATE_RIGHT, &CBitmapviewer1Dlg::OnBnClickedButtonRotateRight)
+    ON_BN_CLICKED(IDC_BUTTON_FLIP_UPSIDE_DOWN, &CBitmapviewer1Dlg::OnBnClickedButtonFlipUpsideDown)
+    ON_BN_CLICKED(IDC_BUTTON_FLIP_LEFT_RIGHT, &CBitmapviewer1Dlg::OnBnClickedButtonFlipLeftRight)
+    ON_BN_CLICKED(IDC_BUTTON_BITMAPFILE_SAVE, &CBitmapviewer1Dlg::OnBnClickedButtonBitmapfileSave)
 END_MESSAGE_MAP()
 
 // CBitmapviewer1Dlg メッセージ ハンドラー
@@ -212,4 +217,50 @@ bool CBitmapviewer1Dlg::LoadBitmap()
     }
     return false;
     printf("");
+}
+
+
+void CBitmapviewer1Dlg::OnBnClickedButtonFlipUpsideDown()
+{
+    if (m_pDialog != nullptr)
+    {
+        m_pDialog->PostMessage(WM_ROTATEBITMAP, CImageDlg::BUTTON_HORIZONTAL_REVERSE, 0);
+        //DrawRotate(BUTTON_HORIZONTAL_REVERSE);
+    }
+}
+
+void CBitmapviewer1Dlg::OnBnClickedButtonFlipLeftRight()
+{
+    if (m_pDialog != nullptr)
+    {
+        m_pDialog->PostMessage(WM_ROTATEBITMAP, CImageDlg::BUTTON_VERTICAL_REVERSE, 0);
+        //DrawRotate(BUTTON_VERTICAL_REVERSE);
+    }
+}
+
+void CBitmapviewer1Dlg::OnBnClickedButtonRotateRight()
+{
+    if (m_pDialog != nullptr)
+    {
+        m_pDialog->PostMessage(WM_ROTATEBITMAP, CImageDlg::BUTTON_90, 0);
+        //DrawRotate(BUTTON_90);
+    }
+}
+
+void CBitmapviewer1Dlg::OnBnClickedButtonRotateLeft()
+{
+    if (m_pDialog != nullptr)
+    {
+        m_pDialog->PostMessage(WM_ROTATEBITMAP, CImageDlg::BUTTON_270, 0);
+        //DrawRotate(BUTTON_270);
+    }
+}
+
+
+void CBitmapviewer1Dlg::OnBnClickedButtonBitmapfileSave()
+{
+    if (m_pDialog != nullptr)
+    {
+		m_pDialog->PostMessage(WM_SAVEBITMAPFILE, 0, 0);
+    }
 }

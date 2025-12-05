@@ -15,6 +15,8 @@ public:
 public:
     // カスタムメッセージID
     static const UINT_PTR WM_DRAWBITMAP = WM_USER + 100;
+	static const UINT_PTR WM_ROTATEBITMAP = WM_USER + 101;
+	static const UINT_PTR WM_SAVEBITMAPFILE = WM_USER + 102;
 
     CString m_strEditBitmapFilename{};
     std::filesystem::path filename;
@@ -50,4 +52,10 @@ protected:
 
 protected:
     bool LoadBitmap();
+public:
+    afx_msg void OnBnClickedButtonRotateLeft();
+    afx_msg void OnBnClickedButtonRotateRight();
+    afx_msg void OnBnClickedButtonFlipUpsideDown();
+    afx_msg void OnBnClickedButtonFlipLeftRight();
+    afx_msg void OnBnClickedButtonBitmapfileSave();
 };

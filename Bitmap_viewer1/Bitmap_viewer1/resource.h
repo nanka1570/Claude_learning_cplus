@@ -16,7 +16,6 @@
 #define IDC_BUTTON_ROTATE_RIGHT         1005
 #define IDC_BUTTON_ROTATE_LEFT          1006
 #define IDC_BUTTON_BITMAPFILE_SAVE      1008
-#define IDC_SCROLLBAR1                  1009
 
 // Next default values for new objects
 // 
