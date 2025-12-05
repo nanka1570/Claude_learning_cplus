@@ -99,6 +99,8 @@ protected:
 protected:
 	afx_msg //ビットマップをダイアログに表示する関数
 		LRESULT OnDrawBitmap(WPARAM wParam, LPARAM lParam);
+	void resizeBitmap(const int width, const int height);
+	HDC hDC = nullptr;
 	DECLARE_MESSAGE_MAP()
 
 protected:
