@@ -114,33 +114,33 @@ LRESULT CImageDlg::OnDrawBitmap(WPARAM wParam, LPARAM lParam)
 
 LRESULT CImageDlg::OnDrawRotate(WPARAM wParam, LPARAM lParam)
 {
-	BUTTONS button = static_cast<BUTTONS>(wParam);
+    BUTTONS button = static_cast<BUTTONS>(wParam);
 
     // 回転状態を累積
     switch (button) {
     case BUTTON_90:
-        m_rotationAngle = (m_rotationAngle + 90) % 360;  // 90度追加
+        m_rotationAngle = (m_rotationAngle + 90) % 360;
         break;
     case BUTTON_270:
-        m_rotationAngle = (m_rotationAngle + 270) % 360; // 270度追加（= -90度）
+        m_rotationAngle = (m_rotationAngle + 270) % 360;
         break;
     case BUTTON_HORIZONTAL_REVERSE:
-        m_flipHorizontal = !m_flipHorizontal;  // トグル（反転/元に戻す）
+        m_flipHorizontal = !m_flipHorizontal;
         break;
     case BUTTON_VERTICAL_REVERSE:
-        m_flipVertical = !m_flipVertical;      // トグル
+        m_flipVertical = !m_flipVertical;
         break;
     }
 
-    // 現在のウィンドウサイズを取得
-    CRect rect;
-    GetClientRect(&rect);
+    // ★ 元画像のサイズを基準にする
+    int baseWidth = m_image.GetWidth();
+    int baseHeight = m_image.GetHeight();
 
-    // 累積した状態でリサイズ
-    resizeBitmap(rect.Width(), rect.Height());
+    resizeBitmap(baseWidth, baseHeight);
 
-	return 0;
+    return 0;
 }
+
 
 LRESULT CImageDlg::OnSaveBitmapFile(WPARAM wParam, LPARAM lParam)
 {
@@ -159,12 +159,46 @@ LRESULT CImageDlg::OnSaveBitmapFile(WPARAM wParam, LPARAM lParam)
 
 void CImageDlg::resizeBitmap(const int width, const int height)
 {
+    // ★ 再入防止
+    if (m_isResizing)
+        return;
+
     if (m_image.IsNull())
         return;
     if (width <= 0 || height <= 0)
         return;
 
-    // ウィンドウサイズ調整（既存のコード）
+    // ★ フラグを立てる
+    m_isResizing = true;
+
+
+    // ★ デバッグ出力を追加
+    CString msg;
+    msg.Format(_T("=== resizeBitmap ===\n"));
+    OutputDebugString(msg);
+    msg.Format(_T("引数: width=%d, height=%d\n"), width, height);
+    OutputDebugString(msg);
+    msg.Format(_T("m_rotationAngle=%d\n"), m_rotationAngle);
+    OutputDebugString(msg);
+    msg.Format(_T("m_image: %d x %d\n"), m_image.GetWidth(), m_image.GetHeight());
+    OutputDebugString(msg);
+
+
+    // ★ 回転角度に応じて、表示サイズを決定
+    int displayWidth = width;
+    int displayHeight = height;
+
+    // 90度/270度の時は縦横を入れ替える
+    if (m_rotationAngle == 90 || m_rotationAngle == 270) {
+        displayWidth = height;
+        displayHeight = width;
+    }
+
+    msg.Format(_T("displayWidth=%d, displayHeight=%d\n"), displayWidth, displayHeight);
+    OutputDebugString(msg);
+
+
+    // ウィンドウサイズを調整
     CRect windowRect, clientRect;
     GetWindowRect(windowRect);
     GetClientRect(clientRect);
@@ -173,24 +207,16 @@ void CImageDlg::resizeBitmap(const int width, const int height)
     const auto borderWidth = windowRect.Width() - clientRect.Width();
     const auto borderHeight = windowRect.Height() - clientRect.Height();
 
-    MoveWindow(windowRect.left, windowRect.top, width + borderWidth, height + borderHeight, FALSE);
+    // ★ displayWidth, displayHeight でダイアログサイズを設定
+    MoveWindow(windowRect.left, windowRect.top, displayWidth + borderWidth, displayHeight + borderHeight, FALSE);
 
     ScreenToClient(clientRect);
-    m_ctrlBitmap2.MoveWindow(clientRect.left, clientRect.top, width, height, FALSE);
+    m_ctrlBitmap2.MoveWindow(clientRect.left, clientRect.top, displayWidth, displayHeight, FALSE);
 
-    // 回転後のサイズを計算
-    int newWidth = width;
-    int newHeight = height;
-
-    if (m_rotationAngle == 90 || m_rotationAngle == 270) {
-        newWidth = height;
-        newHeight = width;
-    }
-
-    // m_imageTemp を作成
+    // m_imageTemp を作成（表示サイズで）
     if (!m_imageTemp.IsNull())
         m_imageTemp.Destroy();
-    m_imageTemp.Create(newWidth, newHeight, m_image.GetBPP());
+    m_imageTemp.Create(displayWidth, displayHeight, m_image.GetBPP());
 
     HDC hDCTemp = m_imageTemp.GetDC();
 
@@ -199,39 +225,37 @@ void CImageDlg::resizeBitmap(const int width, const int height)
 
     // 基本座標（回転なし）
     points[0] = { 0, 0 };
-    points[1] = { newWidth - 1, 0 };
-    points[2] = { 0, newHeight - 1 };
+    points[1] = { displayWidth - 1, 0 };
+    points[2] = { 0, displayHeight - 1 };
 
     // 回転を適用
     switch (m_rotationAngle) {
     case 90:
-        points[0] = { newWidth - 1, 0 };
-        points[1] = { newWidth - 1, newHeight - 1 };
+        points[0] = { displayWidth - 1, 0 };
+        points[1] = { displayWidth - 1, displayHeight - 1 };
         points[2] = { 0, 0 };
         break;
     case 180:
-        points[0] = { newWidth - 1, newHeight - 1 };
-        points[1] = { 0, newHeight - 1 };
-        points[2] = { newWidth - 1, 0 };
+        points[0] = { displayWidth - 1, displayHeight - 1 };
+        points[1] = { 0, displayHeight - 1 };
+        points[2] = { displayWidth - 1, 0 };
         break;
     case 270:
-        points[0] = { 0, newHeight - 1 };
+        points[0] = { 0, displayHeight - 1 };
         points[1] = { 0, 0 };
-        points[2] = { newWidth - 1, newHeight - 1 };
+        points[2] = { displayWidth - 1, displayHeight - 1 };
         break;
     }
 
     // 反転を適用
     if (m_flipHorizontal) {
-        // 上下反転：Y座標を反転
         for (int i = 0; i < 3; ++i) {
-            points[i].y = newHeight - 1 - points[i].y;
+            points[i].y = displayHeight - 1 - points[i].y;
         }
     }
     if (m_flipVertical) {
-        // 左右反転：X座標を反転
         for (int i = 0; i < 3; ++i) {
-            points[i].x = newWidth - 1 - points[i].x;
+            points[i].x = displayWidth - 1 - points[i].x;
         }
     }
 
@@ -241,15 +265,19 @@ void CImageDlg::resizeBitmap(const int width, const int height)
     // m_imageView を作成してコピー
     if (!m_imageView.IsNull())
         m_imageView.Destroy();
-    m_imageView.Create(newWidth, newHeight, m_imageTemp.GetBPP());
+    m_imageView.Create(displayWidth, displayHeight, m_imageTemp.GetBPP());
 
     HDC hDCView = m_imageView.GetDC();
     m_imageTemp.BitBlt(hDCView, 0, 0, SRCCOPY);
     m_imageView.ReleaseDC();
 
     // 表示
+    //m_ctrlBitmap2.ShowWindow(SW_HIDE);
     m_ctrlBitmap2.SetBitmap(m_imageView);
     m_ctrlBitmap2.ShowWindow(SW_SHOW);
+
+    // ★ フラグを下ろす
+    m_isResizing = false;
 }
 
 //DrawBitmap使用
@@ -259,20 +287,6 @@ void CImageDlg::DrawBitmap()
 	return;
 }
 
-////「名前を付けて保存」する
-//void CImageDlg::OnBnClickedButtonBitmapfileSave()
-//{
-//	CFileDialog dlg(FALSE);
-//	if (dlg.DoModal() == IDOK)
-//	{
-//		m_strSaveBitmapFilename = dlg.GetPathName();
-//
-//		UpdateData(FALSE);
-//
-//		ImageSave();
-//	}
-//	printf("");
-//}
 
 void CImageDlg::ImageSave()
 {

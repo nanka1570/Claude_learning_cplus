@@ -91,6 +91,8 @@ protected:
 	bool m_flipVertical = false;   // ¶‰E”½“]‚Ìó‘Ô
 	BUTTONS m_currentButton = BUTTON_DEFAULT;
 	void resizeBitmap(const int width, const int height);
+
+	bool m_isResizing = false;
 	HDC hDC = nullptr;
 
 public:
