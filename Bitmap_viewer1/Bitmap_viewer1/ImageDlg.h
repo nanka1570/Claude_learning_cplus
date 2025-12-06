@@ -83,13 +83,14 @@ protected:
 		LRESULT OnDrawBitmap(WPARAM wParam, LPARAM lParam);
 		LRESULT OnDrawRotate(WPARAM wParam, LPARAM lParam);
 		LRESULT OnSaveBitmapFile(WPARAM wParam, LPARAM lParam);
-	void resizeBitmap(const int width, const int height);
-	HDC hDC = nullptr;
 	DECLARE_MESSAGE_MAP()
 
 protected:
 	//int widthSrc = 0;
 	//int heightSrc = 0;
+	BUTTONS m_currentButton = BUTTON_DEFAULT;
+	void resizeBitmap(const int width, const int height, const BUTTONS button);
+	HDC hDC = nullptr;
 
 public:
 	afx_msg void OnSize(UINT nType, int cx, int cy);

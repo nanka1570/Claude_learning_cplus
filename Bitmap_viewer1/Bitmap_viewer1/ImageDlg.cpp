@@ -78,8 +78,11 @@ void CImageDlg::OnSize(UINT nType, int cx, int cy)
 	CDialogEx::OnSize(nType, cx, cy);
 	if (!m_image.IsNull()) {
 
-		resizeBitmap(cx, cy);
-		ShowWindow(SW_SHOW);
+		if (m_image.IsNull())
+			return;
+		if (m_ctrlBitmap2.GetSafeHwnd() == NULL)
+			return;
+		resizeBitmap(cx, cy, m_currentButton);
 	}
 
 }
@@ -94,47 +97,35 @@ void CImageDlg::setBitmapFile(std::filesystem::path filename)
 
 LRESULT CImageDlg::OnDrawBitmap(WPARAM wParam, LPARAM lParam)
 {
-	//オリジナルをロード
+	// オリジナルをロード
 	m_image.Load(bitmapFilename.native().c_str());
-	//if (!m_imageView.IsNull())
-	//{
-	// m_imageView.Destroy();
-	//}
-	//m_ctrlBitmap2.SetBitmap(m_image);
 
-	const auto srcWidth = m_image.GetWidth();
-	const auto srcHeight = m_image.GetHeight();
-	const auto bpp = m_image.GetBPP();
+	// 回転状態をリセット
+	m_currentButton = BUTTON_DEFAULT;
 
-	if (!m_imageView.IsNull()) {
-		m_imageView.Destroy();
-	}
-	const auto targetWidth = srcWidth;
-	const auto targetHeight = srcHeight;
-
-	//描画するキャンバスを用意 Create(x, y, bpp, 0)
-	m_imageView.Create(targetWidth, targetHeight, bpp);
-	hDC = m_imageView.GetDC();
-	m_image.BitBlt(hDC, 0, 0, SRCCOPY);
-	//m_image.StretchBlt(hDC, 0, 0, targetWidth, targetHeight, SRCCOPY);
-	m_imageView.ReleaseDC();
-
-	 //リサイズ
-	resizeBitmap(targetWidth, targetHeight);
-
-	m_ctrlBitmap2.SetBitmap(m_imageView);
+	// 元画像のサイズでリサイズ（回転なし）
+	resizeBitmap(m_image.GetWidth(), m_image.GetHeight(), BUTTON_DEFAULT);
 
 	ShowWindow(SW_SHOW);
 
 	return 0;
-	printf("");
 }
 
 
 LRESULT CImageDlg::OnDrawRotate(WPARAM wParam, LPARAM lParam)
 {
 	BUTTONS button = static_cast<BUTTONS>(wParam);
-	DrawRotate(button);
+
+	// 現在の回転状態を更新
+	m_currentButton = button;
+
+	// 現在のウィンドウサイズを取得
+	CRect rect;
+	GetClientRect(&rect);
+
+	// 回転を適用してリサイズ
+	resizeBitmap(rect.Width(), rect.Height(), button);
+
 	return 0;
 }
 
@@ -153,64 +144,112 @@ LRESULT CImageDlg::OnSaveBitmapFile(WPARAM wParam, LPARAM lParam)
 }
 
 
-void CImageDlg::resizeBitmap(const int width, const int height)
+void CImageDlg::resizeBitmap(const int width, const int height, const BUTTONS button)
 {
-	if (m_image.IsNull()) {
-		return;
-	}
+    if (m_image.IsNull())
+        return;
+    if (width <= 0 || height <= 0)
+        return;
 
-	if (width <= 0 || height <= 0) {
-		return;
-	}
+    // ウィンドウサイズを調整
+    CRect windowRect, clientRect;
+    GetWindowRect(windowRect);
+    GetClientRect(clientRect);
+    ClientToScreen(clientRect);
 
-	CRect windowRectBitmap;
-	CRect clientRectBitmap;
-	GetWindowRect(windowRectBitmap);
-	GetClientRect(clientRectBitmap);
-	ClientToScreen(clientRectBitmap);
+    const auto borderWidth = windowRect.Width() - clientRect.Width();
+    const auto borderHeight = windowRect.Height() - clientRect.Height();
 
-	//左上と幅・高さのWindowとClientの差を求める
-	const auto marginLeft = clientRectBitmap.left - windowRectBitmap.left;
-	const auto marginTop = clientRectBitmap.top - windowRectBitmap.top;
+    MoveWindow(windowRect.left, windowRect.top, width + borderWidth, height + borderHeight, FALSE);
 
-	const auto borderWidth = (windowRectBitmap.Width() - clientRectBitmap.Width());
-	const auto borderHeight = (windowRectBitmap.Height() - clientRectBitmap.Height());
+    ScreenToClient(clientRect);
+    m_ctrlBitmap2.MoveWindow(clientRect.left, clientRect.top, width, height, FALSE);
 
-	//ビットマップと同じ大きさでダイアログを表示する
-	MoveWindow(windowRectBitmap.left, windowRectBitmap.top, width + borderWidth, height + borderHeight, FALSE);
+    // 回転後のサイズを計算
+    int newWidth = width;
+    int newHeight = height;
 
-	ScreenToClient(clientRectBitmap);
-	//m_ctrlBitmap2.ShowWindow(SW_HIDE);
-	m_ctrlBitmap2.MoveWindow(clientRectBitmap.left, clientRectBitmap.top, width, height, FALSE);
+    if (button == BUTTON_90 || button == BUTTON_270) {
+        // 90度/270度回転は縦横入れ替え
+        newWidth = height;
+        newHeight = width;
+    }
 
-	//ToDo
-	//	m_imageTemp.BitBlt(m_image.GetDC(), 0, 0, SRCCOPY);
-	//	m_image.ReleaseDC();
-	if (!m_imageTemp.IsNull())
-	{
-		m_imageTemp.Destroy();
-	}
+    // m_imageTemp を作成
+    if (!m_imageTemp.IsNull())
+        m_imageTemp.Destroy();
+    m_imageTemp.Create(newWidth, newHeight, m_image.GetBPP());
 
-	m_imageTemp.Create(width, height, m_image.GetBPP());
-	hDC = m_imageTemp.GetDC();
-	m_image.StretchBlt(hDC, 0, 0, width, height, SRCCOPY);
-	m_imageTemp.ReleaseDC();
+    HDC hDCTemp = m_imageTemp.GetDC();
 
-	if (!m_imageView.IsNull())
-	{
-		m_imageView.Destroy();
-	}
+    // 回転/反転の座標を設定
+    POINT points[3] = {};
 
-	m_imageView.Create(width, height, m_imageTemp.GetBPP());
-	hDC = m_imageView.GetDC();
-	m_imageTemp.BitBlt(hDC, 0, 0, SRCCOPY);
-	m_imageView.ReleaseDC();
+    switch (button) {
+    case BUTTON_DEFAULT:
+        // 回転なし：StretchBlt を使用
+        m_image.StretchBlt(hDCTemp, 0, 0, newWidth, newHeight, SRCCOPY);
+        m_imageTemp.ReleaseDC();
+        break;
 
-	//m_imageTemp.PlgBlt(hDC, nullptr);
+    case BUTTON_90:
+        points[0] = { newWidth - 1, 0 };
+        points[1] = { newWidth - 1, newHeight - 1 };
+        points[2] = { 0, 0 };
+        m_image.PlgBlt(hDCTemp, points);
+        m_imageTemp.ReleaseDC();
+        break;
 
-	m_ctrlBitmap2.SetBitmap(m_imageView);
+    case BUTTON_180:
+        points[0] = { newWidth - 1, newHeight - 1 };
+        points[1] = { 0, newHeight - 1 };
+        points[2] = { newWidth - 1, 0 };
+        m_image.PlgBlt(hDCTemp, points);
+        m_imageTemp.ReleaseDC();
+        break;
 
-	m_ctrlBitmap2.ShowWindow(SW_SHOW);
+    case BUTTON_270:
+        points[0] = { 0, newHeight - 1 };
+        points[1] = { 0, 0 };
+        points[2] = { newWidth - 1, newHeight - 1 };
+        m_image.PlgBlt(hDCTemp, points);
+        m_imageTemp.ReleaseDC();
+        break;
+
+    case BUTTON_HORIZONTAL_REVERSE:
+        points[0] = { 0, newHeight - 1 };
+        points[1] = { newWidth - 1, newHeight - 1 };
+        points[2] = { 0, 0 };
+        m_image.PlgBlt(hDCTemp, points);
+        m_imageTemp.ReleaseDC();
+        break;
+
+    case BUTTON_VERTICAL_REVERSE:
+        points[0] = { newWidth - 1, 0 };
+        points[1] = { 0, 0 };
+        points[2] = { newWidth - 1, newHeight - 1 };
+        m_image.PlgBlt(hDCTemp, points);
+        m_imageTemp.ReleaseDC();
+        break;
+
+    default:
+        m_image.StretchBlt(hDCTemp, 0, 0, newWidth, newHeight, SRCCOPY);
+        m_imageTemp.ReleaseDC();
+        break;
+    }
+
+    // m_imageView を作成してコピー
+    if (!m_imageView.IsNull())
+        m_imageView.Destroy();
+    m_imageView.Create(newWidth, newHeight, m_imageTemp.GetBPP());
+
+    HDC hDCView = m_imageView.GetDC();
+    m_imageTemp.BitBlt(hDCView, 0, 0, SRCCOPY);
+    m_imageView.ReleaseDC();
+
+    // 表示
+    m_ctrlBitmap2.SetBitmap(m_imageView);
+    m_ctrlBitmap2.ShowWindow(SW_SHOW);
 }
 
 
@@ -242,95 +281,94 @@ void CImageDlg::ImageSave()
 	return;
 }
 
-void CImageDlg::DrawRotate(const BUTTONS button)
-{
-	const auto srcWidth = m_imageView.GetWidth();
-	const auto srcHeight = m_imageView.GetHeight();
-	auto newWidth = 0;
-	auto newHeight = 0;
-
-	//画像が横になる場合
-	if (button == BUTTON_90 || button == BUTTON_270) {
-		newWidth = srcHeight;
-		newHeight = srcWidth;
-	}
-	else {
-		newWidth = srcWidth;
-		newHeight = srcHeight;
-	}
-
-	//画像が横になる場合は横長のキャンバスにする
-	if (srcWidth != newWidth) {
-		m_imageTemp.Destroy();
-	}
-	if (m_imageTemp.IsNull()) {
-		m_imageTemp.Create(newWidth, newHeight, m_imageView.GetBPP());
-	}
-#if 0
-	POINT points[3] = { {0, 0}, {1, 0}, {0, 1} }; //デフォルト（0）
-	POINT points[3] = { {0, 1}, {0, 0}, {1, 1} }; //90
-	POINT points[3] = { {1, 1}, {0, 1}, {1, 0} }; //180
-	POINT points[3] = { {1, 0}, {1, 1}, {0, 0} }; //270
-	POINT points[3] = { {0, 1}, {1, 1}, {0, 0} }; //H
-	POINT points[3] = { {1, 0}, {0, 0}, {1, 1} }; //V
-#endif
-
-	auto hDC = m_imageTemp.GetDC();
-	POINT points[3] = {};
-	if (button == BUTTON_90) {
-		points[0] = { 1, 0 };
-		points[1] = { 1, 1 };
-		points[2] = { 0, 0 };
-
-	}
-	else if (button == BUTTON_270) {
-		points[0] = { 0, 1 };
-		points[1] = { 0, 0 };
-		points[2] = { 1, 1 };
-	}
-	else if (button == BUTTON_HORIZONTAL_REVERSE) {
-		points[0] = { 0, 1 };
-		points[1] = { 1, 1 };
-		points[2] = { 0, 0 };
-	}
-	else if (button == BUTTON_VERTICAL_REVERSE) {
-		points[0] = { 1, 0 };
-		points[1] = { 0, 0 };
-		points[2] = { 1, 1 };
-	}
-
-	for (int i = 0; i < 3; ++i) {
-		points[i].x *= newWidth;
-		points[i].y *= newHeight;
-
-		switch (button) {
-		case BUTTON_180:
-			points[i].x -= 1;
-			points[i].y -= 1;
-			break;
-		case BUTTON_HORIZONTAL_REVERSE:
-			points[i].y -= 1;
-			break;
-		case BUTTON_VERTICAL_REVERSE:
-			points[i].x -= 1;
-			break; // ← ここでbreakを追加
-		default:
-			break;
-		}
-	}
-	m_imageView.PlgBlt(hDC, points);
-	m_imageTemp.ReleaseDC();
-
-	if (srcWidth != newWidth) {
-		m_imageView.Destroy();
-		m_imageView.Create(newWidth, newHeight, m_imageTemp.GetBPP());
-	}
-
-	hDC = m_imageView.GetDC();
-	m_imageTemp.BitBlt(hDC, 0, 0, SRCCOPY);
-	m_imageView.ReleaseDC();
-
-	m_ctrlBitmap2.SetBitmap(m_imageView);
-
-	//m_imageTemp.Destroy();
-}
+//void CImageDlg::DrawRotate(const BUTTONS button)
+//{
+//	const auto srcWidth = m_imageView.GetWidth();
+//	const auto srcHeight = m_imageView.GetHeight();
+//	auto newWidth = 0;
+//	auto newHeight = 0;
+//
+//	//画像が横になる場合
+//	if (button == BUTTON_90 || button == BUTTON_270) {
+//		newWidth = srcHeight;
+//		newHeight = srcWidth;
+//	}
+//	else {
+//		newWidth = srcWidth;
+//		newHeight = srcHeight;
+//	}
+//
+//	//画像が横になる場合は横長のキャンバスにする
+//	if (srcWidth != newWidth) {
+//		m_imageTemp.Destroy();
+//	}
+//	if (m_imageTemp.IsNull()) {
+//		m_imageTemp.Create(newWidth, newHeight, m_imageView.GetBPP());
+//	}
+//#if 0
+//	POINT points[3] = { {0, 0}, {1, 0}, {0, 1} }; //デフォルト（0）
+//	POINT points[3] = { {0, 1}, {0, 0}, {1, 1} }; //90
+//	POINT points[3] = { {1, 1}, {0, 1}, {1, 0} }; //180
+//	POINT points[3] = { {1, 0}, {1, 1}, {0, 0} }; //270
+//	POINT points[3] = { {0, 1}, {1, 1}, {0, 0} }; //H
+//	POINT points[3] = { {1, 0}, {0, 0}, {1, 1} }; //V
+//#endif
+//
+//	auto hDC = m_imageTemp.GetDC();
+//	POINT points[3] = {};
+//	if (button == BUTTON_90) {
+//		points[0] = { 1, 0 };
+//		points[1] = { 1, 1 };
+//		points[2] = { 0, 0 };
+//
+//	}
+//	else if (button == BUTTON_270) {
+//		points[0] = { 0, 1 };
+//		points[1] = { 0, 0 };
+//		points[2] = { 1, 1 };
+//	}
+//	else if (button == BUTTON_HORIZONTAL_REVERSE) {
+//		points[0] = { 0, 1 };
+//		points[1] = { 1, 1 };
+//		points[2] = { 0, 0 };
+//	}
+//	else if (button == BUTTON_VERTICAL_REVERSE) {
+//		points[0] = { 1, 0 };
+//		points[1] = { 0, 0 };
+//		points[2] = { 1, 1 };
+//	}
+//
+//	for (int i = 0; i < 3; ++i) {
+//		points[i].x *= newWidth;
+//		points[i].y *= newHeight;
+//
+//		switch (button) {
+//		case BUTTON_180:
+//			points[i].x -= 1;
+//			points[i].y -= 1;
+//			break;
+//		case BUTTON_HORIZONTAL_REVERSE:
+//			points[i].y -= 1;
+//			break;
+//		case BUTTON_VERTICAL_REVERSE:
+//			points[i].x -= 1;
+//			break;
+//		default:
+//			break;
+//		}
+//	}
+//	m_imageView.PlgBlt(hDC, points);
+//	m_imageTemp.ReleaseDC();
+//
+//	if (srcWidth != newWidth) {
+//		m_imageView.Destroy();
+//		m_imageView.Create(newWidth, newHeight, m_imageTemp.GetBPP());
+//	}
+//
+//	resizeBitmap(newWidth, newHeight);
+//	//hDC = m_imageView.GetDC();
+//	//m_imageTemp.BitBlt(hDC, 0, 0, SRCCOPY);
+//	//m_imageView.ReleaseDC();
+//
+//	//m_ctrlBitmap2.SetBitmap(m_imageView);
+//}
