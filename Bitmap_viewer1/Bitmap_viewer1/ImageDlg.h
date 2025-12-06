@@ -86,10 +86,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	//int widthSrc = 0;
-	//int heightSrc = 0;
+	int m_rotationAngle = 0;      // Œ»İ‚Ì‰ñ“]Šp“xi0, 90, 180, 270j
+	bool m_flipHorizontal = false; // ã‰º”½“]‚Ìó‘Ô
+	bool m_flipVertical = false;   // ¶‰E”½“]‚Ìó‘Ô
 	BUTTONS m_currentButton = BUTTON_DEFAULT;
-	void resizeBitmap(const int width, const int height, const BUTTONS button);
+	void resizeBitmap(const int width, const int height);
 	HDC hDC = nullptr;
 
 public:

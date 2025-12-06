@@ -82,7 +82,7 @@ void CImageDlg::OnSize(UINT nType, int cx, int cy)
 			return;
 		if (m_ctrlBitmap2.GetSafeHwnd() == NULL)
 			return;
-		resizeBitmap(cx, cy, m_currentButton);
+		resizeBitmap(cx, cy);
 	}
 
 }
@@ -104,7 +104,7 @@ LRESULT CImageDlg::OnDrawBitmap(WPARAM wParam, LPARAM lParam)
 	m_currentButton = BUTTON_DEFAULT;
 
 	// 元画像のサイズでリサイズ（回転なし）
-	resizeBitmap(m_image.GetWidth(), m_image.GetHeight(), BUTTON_DEFAULT);
+	resizeBitmap(m_image.GetWidth(), m_image.GetHeight());
 
 	ShowWindow(SW_SHOW);
 
@@ -116,15 +116,28 @@ LRESULT CImageDlg::OnDrawRotate(WPARAM wParam, LPARAM lParam)
 {
 	BUTTONS button = static_cast<BUTTONS>(wParam);
 
-	// 現在の回転状態を更新
-	m_currentButton = button;
+    // 回転状態を累積
+    switch (button) {
+    case BUTTON_90:
+        m_rotationAngle = (m_rotationAngle + 90) % 360;  // 90度追加
+        break;
+    case BUTTON_270:
+        m_rotationAngle = (m_rotationAngle + 270) % 360; // 270度追加（= -90度）
+        break;
+    case BUTTON_HORIZONTAL_REVERSE:
+        m_flipHorizontal = !m_flipHorizontal;  // トグル（反転/元に戻す）
+        break;
+    case BUTTON_VERTICAL_REVERSE:
+        m_flipVertical = !m_flipVertical;      // トグル
+        break;
+    }
 
-	// 現在のウィンドウサイズを取得
-	CRect rect;
-	GetClientRect(&rect);
+    // 現在のウィンドウサイズを取得
+    CRect rect;
+    GetClientRect(&rect);
 
-	// 回転を適用してリサイズ
-	resizeBitmap(rect.Width(), rect.Height(), button);
+    // 累積した状態でリサイズ
+    resizeBitmap(rect.Width(), rect.Height());
 
 	return 0;
 }
@@ -144,14 +157,14 @@ LRESULT CImageDlg::OnSaveBitmapFile(WPARAM wParam, LPARAM lParam)
 }
 
 
-void CImageDlg::resizeBitmap(const int width, const int height, const BUTTONS button)
+void CImageDlg::resizeBitmap(const int width, const int height)
 {
     if (m_image.IsNull())
         return;
     if (width <= 0 || height <= 0)
         return;
 
-    // ウィンドウサイズを調整
+    // ウィンドウサイズ調整（既存のコード）
     CRect windowRect, clientRect;
     GetWindowRect(windowRect);
     GetClientRect(clientRect);
@@ -169,8 +182,7 @@ void CImageDlg::resizeBitmap(const int width, const int height, const BUTTONS bu
     int newWidth = width;
     int newHeight = height;
 
-    if (button == BUTTON_90 || button == BUTTON_270) {
-        // 90度/270度回転は縦横入れ替え
+    if (m_rotationAngle == 90 || m_rotationAngle == 270) {
         newWidth = height;
         newHeight = width;
     }
@@ -182,61 +194,49 @@ void CImageDlg::resizeBitmap(const int width, const int height, const BUTTONS bu
 
     HDC hDCTemp = m_imageTemp.GetDC();
 
-    // 回転/反転の座標を設定
+    // 回転の座標を設定
     POINT points[3] = {};
 
-    switch (button) {
-    case BUTTON_DEFAULT:
-        // 回転なし：StretchBlt を使用
-        m_image.StretchBlt(hDCTemp, 0, 0, newWidth, newHeight, SRCCOPY);
-        m_imageTemp.ReleaseDC();
-        break;
+    // 基本座標（回転なし）
+    points[0] = { 0, 0 };
+    points[1] = { newWidth - 1, 0 };
+    points[2] = { 0, newHeight - 1 };
 
-    case BUTTON_90:
+    // 回転を適用
+    switch (m_rotationAngle) {
+    case 90:
         points[0] = { newWidth - 1, 0 };
         points[1] = { newWidth - 1, newHeight - 1 };
         points[2] = { 0, 0 };
-        m_image.PlgBlt(hDCTemp, points);
-        m_imageTemp.ReleaseDC();
         break;
-
-    case BUTTON_180:
+    case 180:
         points[0] = { newWidth - 1, newHeight - 1 };
         points[1] = { 0, newHeight - 1 };
         points[2] = { newWidth - 1, 0 };
-        m_image.PlgBlt(hDCTemp, points);
-        m_imageTemp.ReleaseDC();
         break;
-
-    case BUTTON_270:
+    case 270:
         points[0] = { 0, newHeight - 1 };
         points[1] = { 0, 0 };
         points[2] = { newWidth - 1, newHeight - 1 };
-        m_image.PlgBlt(hDCTemp, points);
-        m_imageTemp.ReleaseDC();
-        break;
-
-    case BUTTON_HORIZONTAL_REVERSE:
-        points[0] = { 0, newHeight - 1 };
-        points[1] = { newWidth - 1, newHeight - 1 };
-        points[2] = { 0, 0 };
-        m_image.PlgBlt(hDCTemp, points);
-        m_imageTemp.ReleaseDC();
-        break;
-
-    case BUTTON_VERTICAL_REVERSE:
-        points[0] = { newWidth - 1, 0 };
-        points[1] = { 0, 0 };
-        points[2] = { newWidth - 1, newHeight - 1 };
-        m_image.PlgBlt(hDCTemp, points);
-        m_imageTemp.ReleaseDC();
-        break;
-
-    default:
-        m_image.StretchBlt(hDCTemp, 0, 0, newWidth, newHeight, SRCCOPY);
-        m_imageTemp.ReleaseDC();
         break;
     }
+
+    // 反転を適用
+    if (m_flipHorizontal) {
+        // 上下反転：Y座標を反転
+        for (int i = 0; i < 3; ++i) {
+            points[i].y = newHeight - 1 - points[i].y;
+        }
+    }
+    if (m_flipVertical) {
+        // 左右反転：X座標を反転
+        for (int i = 0; i < 3; ++i) {
+            points[i].x = newWidth - 1 - points[i].x;
+        }
+    }
+
+    m_image.PlgBlt(hDCTemp, points);
+    m_imageTemp.ReleaseDC();
 
     // m_imageView を作成してコピー
     if (!m_imageView.IsNull())
@@ -251,7 +251,6 @@ void CImageDlg::resizeBitmap(const int width, const int height, const BUTTONS bu
     m_ctrlBitmap2.SetBitmap(m_imageView);
     m_ctrlBitmap2.ShowWindow(SW_SHOW);
 }
-
 
 //DrawBitmap使用
 void CImageDlg::DrawBitmap()
