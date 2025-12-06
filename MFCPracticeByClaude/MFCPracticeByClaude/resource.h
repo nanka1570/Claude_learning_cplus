@@ -8,7 +8,6 @@
 #define IDD_MFCPRACTICEBYCLAUDE_DIALOG  102
 #define IDD_MAINDIALOG                  102
 #define IDR_MAINFRAME                   128
-#define IDD_DIALOG1                     130
 #define IDD_SUBDIALOG                   130
 #define IDC_BUTTON1                     1000
 

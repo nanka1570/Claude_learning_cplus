@@ -4,6 +4,7 @@
 
 #pragma once
 
+class CSubDlg;
 
 // MainDlg ダイアログ
 class MainDlg : public CDialogEx
@@ -35,4 +36,8 @@ protected:
 public:
 	static const UINT WM_MYMESSAGE = WM_USER + 100;
 	afx_msg void OnBnClickedButton1();
+
+protected:
+	CSubDlg* m_pSubDlg = nullptr;
+
 };

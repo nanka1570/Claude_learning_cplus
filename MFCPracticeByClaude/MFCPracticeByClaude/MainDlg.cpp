@@ -158,5 +158,12 @@ HCURSOR MainDlg::OnQueryDragIcon()
 
 void MainDlg::OnBnClickedButton1()
 {
-	PostMessage(WM_MYMESSAGE, 0, 0);
+	if (m_pSubDlg == nullptr)
+	{
+		m_pSubDlg = new CSubDlg(this);
+		m_pSubDlg -> Create(IDD_SUBDIALOG, this);
+		m_pSubDlg->ShowWindow(SW_SHOW);
+	}
+
+	m_pSubDlg->PostMessage(WM_MYMESSAGE, 0, 0);
 }
