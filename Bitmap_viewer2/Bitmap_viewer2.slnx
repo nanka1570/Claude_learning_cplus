@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Bitmap_viewer2/Bitmap_viewer2.vcxproj" />
+</Solution>

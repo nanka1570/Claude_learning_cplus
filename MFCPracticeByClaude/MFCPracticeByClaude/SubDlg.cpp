@@ -47,3 +47,40 @@ void CSubDlg::OnBnClickedCancel()
 	// TODO: ここにコントロール通知ハンドラー コードを追加します。
 	CDialogEx::OnCancel();
 }
+
+
+void CSubDlg::DrawImage()
+{
+	CImage image;
+
+	image.Create(100, 100, 24);
+
+	HDC hDC = image.GetDC();
+
+	image.ReleaseDC();
+	if (!image.IsNull())
+		image.Destroy();
+	//image.BitBlt(hDC, 200, 200, SRCCOPY);
+	image.Create(200, 200, 24);
+
+	HDC hDC2 = image.GetDC();
+
+	image.ReleaseDC();
+}
+
+
+void CSubDlg::ResizeImage(int newWidth, int newHeight)
+{
+	if (!m_image.IsNull())
+	{
+		m_image.Destroy();
+	}
+	m_image.Create(newWidth, newHeight, 24);
+
+	HDC hDC = m_image.GetDC();
+	
+	m_image.BitBlt(hDC, 0, 0, SRCCOPY);
+	
+	m_image.ReleaseDC();
+
+}
