@@ -7,15 +7,16 @@ class CBubbleSortDlg : public CDialogEx
 	DECLARE_DYNAMIC(CBubbleSortDlg)
 
 public:
-	explicit CBubbleSortDlg(const int tabIndex, CWnd* pParent = nullptr);
+	explicit CBubbleSortDlg(const int tabIndex, CWnd* pParent = nullptr);   // 標準コンストラクター
 	virtual ~CBubbleSortDlg() noexcept;
 
+	// ダイアログ データ
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_BUBBLE_SORT_DIALOG };
 #endif
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV サポート
 	virtual BOOL OnInitDialog() override;
 
 protected:

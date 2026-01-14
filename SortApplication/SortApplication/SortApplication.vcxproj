@@ -183,8 +183,8 @@
     </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BubbleSortDlg.h" />
-    <ClInclude Include="CGraphDlg.h" />
+    <ClInclude Include="CBubbleSortDlg.h" />
+    <ClInclude Include="GraphDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Resource.h" />
@@ -193,8 +193,8 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BubbleSortDlg.cpp" />
-    <ClCompile Include="CGraphDlg.cpp" />
+    <ClCompile Include="CBubbleSortDlg.cpp" />
+    <ClCompile Include="GraphDlg.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

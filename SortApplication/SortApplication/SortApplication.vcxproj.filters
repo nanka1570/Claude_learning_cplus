@@ -33,10 +33,10 @@
     <ClInclude Include="pch.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="BubbleSortDlg.h">
+    <ClInclude Include="CBubbleSortDlg.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
-    <ClInclude Include="CGraphDlg.h">
+    <ClInclude Include="GraphDlg.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
   </ItemGroup>
@@ -50,10 +50,10 @@
     <ClCompile Include="pch.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="BubbleSortDlg.cpp">
+    <ClCompile Include="CBubbleSortDlg.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
-    <ClCompile Include="CGraphDlg.cpp">
+    <ClCompile Include="GraphDlg.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
   </ItemGroup>
