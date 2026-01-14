@@ -51,10 +51,10 @@ LRESULT CGraphDlg::OnViewSort(WPARAM wParam, LPARAM lParam)
 void CGraphDlg::viewSortGraph()
 {
 	//ランダムな値を表示
-	//CStatic* sortText{};
-	sortText = (CStatic*)GetDlgItem(IDC_EDIT_RANDOM_NUM);
-	//CSortApplicationDlgのNumOutput関数を使って出力
-	m_pParent->NumOutput(m_nSortNum, sortText);
+	//CStatic* m_sortText{};
+	m_sortText = (CStatic*)GetDlgItem(IDC_EDIT_RANDOM_NUM);
+	//CSortApplicationDlgのOutputNumbers関数を使って出力
+	m_pParent->OutputNumbers(m_nSortNum, m_sortText);
 	Sleep(1000);
 
 	//バブルソート
@@ -85,57 +85,63 @@ void CGraphDlg::SortSwitch(SORTENUM sortType)
 
 
 //バブルソートで並べ替える関数
-std::vector<int> CGraphDlg::BubbleSort(SORTENUM sortOrder)
+void CGraphDlg::BubbleSort(SORTENUM sortOrder)
 {
 	//ソートする配列の長さをarrayLengthに代入
 	auto arrayLength = m_nSortNum.size();	//変更
-	auto lastIndex = arrayLength - 1;
+	
 
-	auto begin{ std::chrono::system_clock::now() };			//処理開始時間
-	auto end{ std::chrono::system_clock::now() };			//処理終了時間
-	auto excludeBegin{ std::chrono::system_clock::now() };	//除外処理開始時間
-	auto excludeEnd{ std::chrono::system_clock::now() };	//除外処理終了時間
-	auto totalExclude{ std::chrono::duration_cast<std::chrono::milliseconds>(excludeEnd - excludeBegin).count() };	//合計除外時間
+	//auto begin{ std::chrono::system_clock::now() };			//処理開始時間
+	//auto end{ std::chrono::system_clock::now() };			//処理終了時間
+	//auto excludeBegin{ std::chrono::system_clock::now() };	//除外処理開始時間
+	//auto excludeEnd{ std::chrono::system_clock::now() };	//除外処理終了時間
+	//auto totalExclude{ std::chrono::duration_cast<std::chrono::milliseconds>(excludeEnd - excludeBegin).count() };	//合計除外時間
+	auto begin = std::chrono::high_resolution_clock::now();
+	auto end = std::chrono::high_resolution_clock::now();
+	auto totalExclude = 0LL;  //変更
+
 	auto duration{ (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count()) - totalExclude };	//ソートアルゴリズムの経過時間
 
 	switch (sortOrder) {
 	case SORT_BUBBLE_ASC:		//昇順のバブルソート
-		begin = std::chrono::system_clock::now();
+		begin = std::chrono::high_resolution_clock::now();
 		for (arrayLength; arrayLength > 0; --arrayLength) {
+				auto lastIndex = arrayLength - 1;
 			for (int baseIndex = 0; baseIndex < lastIndex; ++baseIndex) {
-				int nextIndex = baseIndex + 1;
+				auto nextIndex = baseIndex + 1;
 				if (m_nSortNum[baseIndex] > m_nSortNum[nextIndex]) {
 					std::swap(m_nSortNum[baseIndex], m_nSortNum[nextIndex]);
-					swapCount += 1;
+					m_swapCount += 1;
 				}
-				//PostMessage(WM_NUMOUTPUT, 0, 0);
-				excludeBegin = std::chrono::system_clock::now();
-				Sleep(50);
-				m_pParent->NumOutput(m_nSortNum, sortText);	//変更
-				excludeEnd = std::chrono::system_clock::now();
+				//PostMessage(WM_OutputNumbers, 0, 0);
+				auto excludeBegin = std::chrono::high_resolution_clock::now();
+				Sleep(WAITING_TIME);
+				m_pParent->OutputNumbers(m_nSortNum, m_sortText);	//変更
+				auto excludeEnd = std::chrono::high_resolution_clock::now();
 				//除外時間の合計をループが回るたびに蓄積
 				totalExclude += std::chrono::duration_cast<std::chrono::milliseconds>(excludeEnd - excludeBegin).count();
 			}
 		}
-		end = std::chrono::system_clock::now();
+		end = std::chrono::high_resolution_clock::now();
 		break;
 	case SORT_BUBBLE_DESC:		//降順のバブルソート
-		begin = std::chrono::system_clock::now();
+		begin = std::chrono::high_resolution_clock::now();
 		for (arrayLength; arrayLength > 0; --arrayLength) {
+			auto lastIndex = arrayLength - 1;
 			for (int baseIndex = lastIndex; baseIndex > 0; --baseIndex) {
 				int nextIndex = baseIndex - 1;
 				if (m_nSortNum[baseIndex] > m_nSortNum[nextIndex]) {
 					std::swap(m_nSortNum[baseIndex], m_nSortNum[nextIndex]);
 				}
-				excludeBegin = std::chrono::system_clock::now();
-				Sleep(50);
-				m_pParent->NumOutput(m_nSortNum, sortText);	//変更
-				excludeEnd = std::chrono::system_clock::now();
+				auto excludeBegin = std::chrono::high_resolution_clock::now();
+				Sleep(WAITING_TIME);
+				m_pParent->OutputNumbers(m_nSortNum, m_sortText);	//変更
+				auto excludeEnd = std::chrono::high_resolution_clock::now();
 				//除外時間の合計をループが回るたびに蓄積
 				totalExclude += std::chrono::duration_cast<std::chrono::milliseconds>(excludeEnd - excludeBegin).count();
 			}
 		}
-		end = std::chrono::system_clock::now();
+		end = std::chrono::high_resolution_clock::now();
 		break;
 	default:
 		break;

@@ -62,7 +62,7 @@ void CSortApplicationDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TAB_SORT_CHANGE, m_ctrlSortTab);
-	//DDX_Control(pDX, IDC_EDIT_SWAP_NUM, m_ctrlEditSwapCount);
+	//DDX_Control(pDX, IDC_EDIT_SWAP_NUM, m_ctrlEditm_swapCount);
 }
 
 BEGIN_MESSAGE_MAP(CSortApplicationDlg, CDialogEx)
@@ -72,7 +72,7 @@ BEGIN_MESSAGE_MAP(CSortApplicationDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_RANDOM, &CSortApplicationDlg::OnBnClickedRandom)
 	ON_BN_CLICKED(IDC_BUTTON_SORT, &CSortApplicationDlg::OnBnClickedSort)
 	ON_MESSAGE(WM_SORTSWITCH, OnSortSwitch)
-	//ON_MESSAGE(WM_NUMOUTPUT, OnNumOutPut)
+	//ON_MESSAGE(WM_OutputNumbers, OnOutputNumbers)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_SORT_CHANGE, OnTcnSelChangeTab)
 END_MESSAGE_MAP()
 
@@ -191,7 +191,7 @@ void CSortApplicationDlg::OnTcnSelChangeTab(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CSortApplicationDlg::OnBnClickedRandom()
 {
-	RandomNumGenerate();
+	GenerateRandomNumbers();
 }
 
 
@@ -224,7 +224,7 @@ void CSortApplicationDlg::OnBnClickedSort()
 
 
 //１から昇順に挿入された配列を生成し、配列をランダムで入れ替える
-void CSortApplicationDlg::RandomNumGenerate()
+void CSortApplicationDlg::GenerateRandomNumbers()
 {
 	//RandomNumに値が入っていたら削除する
 	RandomNum.clear();
@@ -243,20 +243,20 @@ void CSortApplicationDlg::RandomNumGenerate()
 
 	//ランダムに並べ替えた数値を出力
 	m_randomText = (CStatic*)GetDlgItem(IDC_EDIT_RANDOM_NUM);
-	sortText = (CStatic*)GetDlgItem(IDC_EDIT_SORT_NUM);
+	m_sortText = (CStatic*)GetDlgItem(IDC_EDIT_SORT_NUM);
 
 	//SortNumに初期値を代入
 	SortNum = RandomNum;
 
-	NumOutput(RandomNum, m_randomText);
-	//NumOutput(RandomNum, sortText);
+	OutputNumbers(RandomNum, m_randomText);
+	//OutputNumbers(RandomNum, m_sortText);
 
 	return;
 }
 
 
 //int型の配列を文字列にしてテキストボックスに出力
-void CSortApplicationDlg::NumOutput(std::vector<int> array, CStatic* text)
+void CSortApplicationDlg::OutputNumbers(const std::vector<int>& array, CStatic* text)
 {
 	//RandomNum[]をテキストに変換
 	CString NumText{};
@@ -271,6 +271,7 @@ void CSortApplicationDlg::NumOutput(std::vector<int> array, CStatic* text)
 	//出力のテキストボックスに配列を表示する
 	text->SetWindowText(NumText);
 	text->RedrawWindow();
+	//text->UpdateWindow();
 
 	return;
 }

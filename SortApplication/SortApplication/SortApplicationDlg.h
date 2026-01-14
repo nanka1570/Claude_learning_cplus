@@ -22,10 +22,11 @@ public:
 
 public:
     static HWND g_hWnd;
-    void NumOutput(std::vector<int> array, CStatic* text);  //指定したフォーマットで配列を出力する関数
+    //変更
+    void OutputNumbers(const std::vector<int>& array, CStatic* text);  //指定したフォーマットで配列を出力する関数
 
 public:
-    CStatic* sortText = {};
+    CStatic* m_sortText = {};
     CGraphDlg::SORTENUM sortType{};
 
 protected:
@@ -41,24 +42,23 @@ protected:
     HICON m_hIcon;
     afx_msg
         HCURSOR OnQueryDragIcon();
-    LRESULT OnSortSwitch(WPARAM wParam, LPARAM lParam);
-    void OnBnClickedRandom();
-    void OnBnClickedSort();
-    void OnTcnSelChangeTab(NMHDR* pNMHDR, LRESULT* pResult);
+        LRESULT OnSortSwitch(WPARAM wParam, LPARAM lParam);
+        void OnBnClickedRandom();
+        void OnBnClickedSort();
+        void OnTcnSelChangeTab(NMHDR* pNMHDR, LRESULT* pResult);
     DECLARE_MESSAGE_MAP()
 
 protected:
-    void RandomNumGenerate();   //ランダムな配列を生成する関数
+    void GenerateRandomNumbers();   //ランダムな配列を生成する関数
 
 protected:
     CTabCtrl m_ctrlSortTab{};
     CStatic* m_randomText = {};
-    CEdit* m_ctrlEditSwapCount = {};
+    CEdit* m_ctrlEditm_swapCount = {};
 
 protected:
     std::vector<int> RandomNum{};
     std::vector<int> SortNum{};
     std::vector<CWnd*> m_tabs{};
-    const int waitingTime = 30;
 
 };

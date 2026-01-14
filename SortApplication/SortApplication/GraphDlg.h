@@ -38,7 +38,7 @@ protected:
 	void viewSortGraph();
 
 protected:
-	//void NumOutput(std::vector<int> array, CStatic* text);	//変更
+	//void OutputNumbers(std::vector<int> array, CStatic* text);	//変更
 	SORTENUM m_nSortType;
 	//const std::vector<int> m_nRandomNum;
 	std::vector<int> m_nSortNum;
@@ -47,8 +47,9 @@ protected:
 	//バブルソート・クイックソート・昇順・降順を切り替える
 	void SortSwitch(SORTENUM sortType);
 	//昇順・降順にバブルソートで並べ替える関数
-	std::vector<int> BubbleSort(SORTENUM sortOrder);
+	void BubbleSort(SORTENUM sortOrder);	//変更
 
-	int swapCount = 0;
-	CStatic* sortText{};
+	int m_swapCount = 0;
+	CStatic* m_sortText{};
+	const int WAITING_TIME = 30;
 };
