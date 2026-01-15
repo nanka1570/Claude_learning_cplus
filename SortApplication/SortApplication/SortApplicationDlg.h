@@ -7,58 +7,55 @@
 class CSortApplicationDlg : public CDialogEx
 {
 public:
-    CSortApplicationDlg(CWnd* pParent = nullptr);
+	CSortApplicationDlg(CWnd* pParent = nullptr);
 
 #ifdef AFX_DESIGN_TIME
-    enum { IDD = IDD_SORTAPPLICATION_DIALOG };
+	enum { IDD = IDD_SORTAPPLICATION_DIALOG };
 #endif
 
 protected:
-    virtual void DoDataExchange(CDataExchange* pDX);
+	virtual void DoDataExchange(CDataExchange* pDX);
 
 public:
-    static const UINT_PTR WM_SORTSWITCH = WM_USER + 100;
-    static const UINT_PTR WM_VIEWSORT = WM_USER + 101;
-
-public:
-    static HWND g_hWnd;
-    //変更
-    void OutputNumbers(const std::vector<int>& array, CStatic* text);  //指定したフォーマットで配列を出力する関数
-
-public:
-    CStatic* m_sortText = {};
-    CGraphDlg::SORTENUM sortType{};
+	static const UINT_PTR WM_SORTSWITCH = WM_USER + 100;
+	static const UINT_PTR WM_VIEWSORT = WM_USER + 101;
+	static HWND g_hWnd;
+	void NumOutput(const std::vector<int>& array, CStatic* text);	//指定したフォーマットで配列を出力する関数
 
 protected:
-    void OnSysCommand(UINT nID, LPARAM lParam);
-    void OnPaint();
+	HICON m_hIcon;
+	HCURSOR OnQueryDragIcon();
+	LRESULT OnSortSwitch(WPARAM wParam, LPARAM lParam);
 
 protected:
-    virtual BOOL OnInitDialog();
-    virtual void OnOK();
-    virtual void OnCancel();
+	afx_msg
+		void OnSysCommand(UINT nID, LPARAM lParam);
+	void OnPaint();
+	void OnBnClickedRandom();
+	void OnBnClickedSort();
+	void OnTcnSelChangeTab(NMHDR* pNMHDR, LRESULT* pResult);
+	DECLARE_MESSAGE_MAP()
 
 protected:
-    HICON m_hIcon;
-    afx_msg
-        HCURSOR OnQueryDragIcon();
-        LRESULT OnSortSwitch(WPARAM wParam, LPARAM lParam);
-        void OnBnClickedRandom();
-        void OnBnClickedSort();
-        void OnTcnSelChangeTab(NMHDR* pNMHDR, LRESULT* pResult);
-    DECLARE_MESSAGE_MAP()
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
+	virtual void OnCancel();
+
 
 protected:
-    void GenerateRandomNumbers();   //ランダムな配列を生成する関数
+	CTabCtrl m_ctrlSortTab{};			//タブコントロール
+	CStatic* m_randomText = {};			//並べ替え前のエディットボックス
+	CStatic* m_sortText = {};				//並べ替え後のエディットボックス
+	CEdit* m_ctrlEditSwapCount = {};	//入れ替えた回数を表示するエディットボックス
 
 protected:
-    CTabCtrl m_ctrlSortTab{};
-    CStatic* m_randomText = {};
-    CEdit* m_ctrlEditm_swapCount = {};
+	CGraphDlg::SORTENUM sortType{};		//SORTENUMのインスタンス
 
 protected:
-    std::vector<int> RandomNum{};
-    std::vector<int> SortNum{};
-    std::vector<CWnd*> m_tabs{};
+	void RandomNumGenerate();			//ランダムな配列を生成する関数
 
+protected:
+	std::vector<int> m_randomNum{};		//並べ替え前（ランダム）の配列を入れる変数
+	std::vector<int> m_sortNum{};		//並べ替え後（バブルソート or クイックソート）した配列を入れる変数
+	std::vector<CWnd*> m_tabs{};		//タブ配列を入れる変数
 };

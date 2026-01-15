@@ -22,6 +22,7 @@
 #define IDC_RADIO_QUICK_ASC             1020
 #define IDC_RADIO_QUICK_DESC            1021
 #define IDC_SORT_GRAPH                  1031
+#define IDC_STATIC_GRAPH                1031
 
 // Next default values for new objects
 // 

@@ -12,6 +12,7 @@
 #include <chrono>
 
 #include "CBubbleSortDlg.h"
+//#include "CQuickSortDlg.h"
 #include "GraphDlg.h"
 
 #ifdef _DEBUG
@@ -51,7 +52,7 @@ END_MESSAGE_MAP()
 
 HWND CSortApplicationDlg::g_hWnd{ nullptr };
 
-CSortApplicationDlg::CSortApplicationDlg(CWnd* pParent /*= nullptr */ )
+CSortApplicationDlg::CSortApplicationDlg(CWnd* pParent /*=nullptr*/)
 	: CDialogEx(IDD_SORTAPPLICATION_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
@@ -62,7 +63,6 @@ void CSortApplicationDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_TAB_SORT_CHANGE, m_ctrlSortTab);
-	//DDX_Control(pDX, IDC_EDIT_SWAP_NUM, m_ctrlEditm_swapCount);
 }
 
 BEGIN_MESSAGE_MAP(CSortApplicationDlg, CDialogEx)
@@ -72,7 +72,6 @@ BEGIN_MESSAGE_MAP(CSortApplicationDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON_RANDOM, &CSortApplicationDlg::OnBnClickedRandom)
 	ON_BN_CLICKED(IDC_BUTTON_SORT, &CSortApplicationDlg::OnBnClickedSort)
 	ON_MESSAGE(WM_SORTSWITCH, OnSortSwitch)
-	//ON_MESSAGE(WM_OutputNumbers, OnOutputNumbers)
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_SORT_CHANGE, OnTcnSelChangeTab)
 END_MESSAGE_MAP()
 
@@ -154,7 +153,6 @@ void CSortApplicationDlg::OnPaint()
 }
 
 
-
 HCURSOR CSortApplicationDlg::OnQueryDragIcon()
 {
 	return static_cast<HCURSOR>(m_hIcon);
@@ -163,7 +161,7 @@ HCURSOR CSortApplicationDlg::OnQueryDragIcon()
 
 void CSortApplicationDlg::OnOK()
 {
-	/* DONOTHING */
+	/*DONOTHING*/
 }
 
 
@@ -191,7 +189,7 @@ void CSortApplicationDlg::OnTcnSelChangeTab(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CSortApplicationDlg::OnBnClickedRandom()
 {
-	GenerateRandomNumbers();
+	RandomNumGenerate();
 }
 
 
@@ -205,7 +203,6 @@ LRESULT CSortApplicationDlg::OnSortSwitch(WPARAM wParam, LPARAM lParam)
 }
 
 
-
 //ボタンが押されたときに選択された並べ替えを行う
 //ボタンを押されたときにグラフの表示ダイアログを開く
 void CSortApplicationDlg::OnBnClickedSort()
@@ -215,7 +212,7 @@ void CSortApplicationDlg::OnBnClickedSort()
 	if (m_pDialog != nullptr)
 		m_pDialog->ShowWindow(SW_HIDE);
 
-	m_pDialog = new CGraphDlg(this, sortType, SortNum);
+	m_pDialog = new CGraphDlg(this, sortType, m_sortNum);
 	m_pDialog->Create(IDD_GRAPH_DIALOG);
 	m_pDialog->ShowWindow(SW_SHOW);
 	m_pDialog->PostMessage(WM_VIEWSORT, 0, 0);
@@ -224,39 +221,39 @@ void CSortApplicationDlg::OnBnClickedSort()
 
 
 //１から昇順に挿入された配列を生成し、配列をランダムで入れ替える
-void CSortApplicationDlg::GenerateRandomNumbers()
+void CSortApplicationDlg::RandomNumGenerate()
 {
 	//RandomNumに値が入っていたら削除する
-	RandomNum.clear();
+	m_randomNum.clear();
 
 	//テキストボックスに入力された数字を取得
 	auto inputNumLength = GetDlgItemInt(IDC_EDIT_INPUT_NUM);
 	//入力された数字を長さとして配列を作成する
 	for (int i = 1; i <= inputNumLength; ++i) {
-		RandomNum.push_back(i);
+		m_randomNum.push_back(i);
 	}
 
 	//配列をランダムに並べ替える
 	std::random_device rd;		//ハードウェアに基づいたランダムな数値をrandom_deviceクラスで生成
 	std::mt19937 generator(rd());		//random_deviceクラスをシード値として、mt19937で乱数を生成
-	std::shuffle(RandomNum.begin(), RandomNum.end(), generator);		//乱数を使い配列をシャッフルする
+	std::shuffle(m_randomNum.begin(), m_randomNum.end(), generator);		//乱数を使い配列をシャッフルする
 
 	//ランダムに並べ替えた数値を出力
 	m_randomText = (CStatic*)GetDlgItem(IDC_EDIT_RANDOM_NUM);
 	m_sortText = (CStatic*)GetDlgItem(IDC_EDIT_SORT_NUM);
 
 	//SortNumに初期値を代入
-	SortNum = RandomNum;
+	m_sortNum = m_randomNum;
 
-	OutputNumbers(RandomNum, m_randomText);
-	//OutputNumbers(RandomNum, m_sortText);
+	NumOutput(m_randomNum, m_randomText);
+	//NumOutput(RandomNum, sortText);
 
 	return;
 }
 
 
 //int型の配列を文字列にしてテキストボックスに出力
-void CSortApplicationDlg::OutputNumbers(const std::vector<int>& array, CStatic* text)
+void CSortApplicationDlg::NumOutput(const std::vector<int>& array, CStatic* text)
 {
 	//RandomNum[]をテキストに変換
 	CString NumText{};
@@ -271,7 +268,6 @@ void CSortApplicationDlg::OutputNumbers(const std::vector<int>& array, CStatic* 
 	//出力のテキストボックスに配列を表示する
 	text->SetWindowText(NumText);
 	text->RedrawWindow();
-	//text->UpdateWindow();
 
 	return;
 }
