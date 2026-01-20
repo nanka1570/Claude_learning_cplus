@@ -49,16 +49,19 @@ LRESULT CGraphDlg::OnViewSort(WPARAM wParam, LPARAM lParam)
 //グラフを表示する
 void CGraphDlg::ViewSortGraph()
 {
+#if 0
 	//ランダムな値を表示
 	m_sortText = (CStatic*)GetDlgItem(IDC_EDIT_RANDOM_NUM);
 	//CSortApplicationDlgのNumOutput関数を使って出力
 	m_pParent->NumOutput(m_nSortNum, m_sortText);
 	Sleep(1000);
-
 	//バブルソートをテキスト表示
-	SortSwitch(m_nSortType);
+	//SortSwitch(m_nSortType);
+#else
 	//グラフを表示する
 	//DrawSortGraph(m_nSortType);
+	SortSwitch(m_nSortType);
+#endif
 }
 
 
@@ -68,55 +71,58 @@ void CGraphDlg::DrawSortGraph(SORTENUM sortType)
 	//x軸がi
 	//y軸がm_nSortNum[i]
 
-	auto length = m_nSortNum.size();				//配列の長さを取得
 	auto maxIterator = std::max_element(m_nSortNum.begin(), m_nSortNum.end());	//配列の中で一番値が大きいイテレータを取得
 	auto maxIndex = std::distance(m_nSortNum.begin(), maxIterator);				//そのイテレータのインデックスを取得
-	auto maxValue = m_nSortNum[maxIndex];											//一番大きい値をheightに代入
+	auto maxValue = m_nSortNum[maxIndex];										//一番大きい値をheightに代入
 
-	//m_nSortNumの初期値をまずグラフにできるようにする
+	//m_nSortNumの初期値（ランダム数列）をグラフにできるようにする
 
 	//クライアント領域のwidth、heightを求める
 	CRect clientRect;
 	GetClientRect(clientRect);
-	auto targetWidth = clientRect.Width();
-	auto targetHeight = clientRect.Height();
+	auto clientWidth = clientRect.Width();
+	auto clientHeight = clientRect.Height();
 
 	if (!m_imageGraph.IsNull())
 		m_imageGraph.Destroy();
 
-	m_imageGraph.Create(targetWidth, targetHeight, 16);		//グラフ本体
-	HDC hDCMain = m_imageGraph.GetDC();				//描く紙
-	//RECT rect = { 0, 0, 100, 100 };
-	HBRUSH brushWhite = CreateSolidBrush(RGB(255, 255, 255));
-	FillRect(hDCMain, &clientRect, brushWhite);
-	DeleteObject(brushWhite);
+	m_imageGraph.Create(clientWidth, clientHeight, 24);		//グラフ本体
+	HDC hDCMain = m_imageGraph.GetDC();				//描くメインの紙
 
-	auto barWidth = targetWidth / length;					//棒グラフの幅
+	CBrush brushMain;
+	brushMain.CreateSolidBrush(RGB(255, 255, 255));	//メインの紙の背景色を生成
+	//SetBkColor(hDCMain, RGB(255, 0, 0));
 
-	for (int i = 0; i < length; ++i) {
-		auto value = m_nSortNum[i];
-		auto barHeight = (value * targetHeight) / maxValue;	//棒グラフの高さを計算
+	CRect rectMain = { 0, 0, clientWidth, clientHeight };	//背景を描画する位置
+	//hDCMain（紙）のrectMain（0, 0, クライアントの幅, クライアントの高さ）の位置をbrushMain（白）で塗りつぶす
+	FillRect(hDCMain, rectMain, brushMain);
 
-		CImage barImage;	//棒グラフ
-		barImage.Create(barWidth, barHeight, 16);
 
-		HDC hDCBar = barImage.GetDC();
-		RECT barRect = { 0, 0, barWidth, barHeight };
-		HBRUSH brushBlue = CreateSolidBrush(RGB(0, 100, 255));
-		FillRect(hDCBar, &barRect, brushBlue);
-		DeleteObject(brushBlue);
-		barImage.ReleaseDC();
+	CImage m_imageBar;
+	auto length = m_nSortNum.size();				//配列の長さを取得
+	auto barWidth = clientWidth / length;
+	CBrush brushBar;
+	brushBar.CreateSolidBrush(RGB(0, 100, 255));
+	CRect rectBar;
 
-		auto x = i * barWidth + 2;
-		auto y = targetHeight - barHeight;
-		barImage.BitBlt(hDCMain, x, y, SRCCOPY);
+	for (auto i = 0; i < length; ++i) {
+		auto barHeight = m_nSortNum[i] * clientHeight / maxValue;	//棒の高さを計算
+		if (barWidth < 1) barWidth = 1;  // ← 追加
+		int left = i * barWidth;			//左	
+		int top = clientHeight - barHeight;	//上
+		int right = left + barWidth;		//右	
+		int bottom = clientHeight;			//下
+		rectBar = { left, top, right, bottom };
 
-		barImage.Destroy();
+		//m_imageBar.Create(barWidth, barHeight, 24);
+		//HDC hDCBar = m_imageBar.GetDC();
+		FillRect(hDCMain, rectBar, brushBar);
+		//
 	}
 
 	m_imageGraph.ReleaseDC();
+
 	m_ctrlViewGraph.SetBitmap(m_imageGraph);	//ピクチャコントロールに出力
-	m_imageGraph.Destroy();
 
 }
 
@@ -163,9 +169,12 @@ void CGraphDlg::BubbleSort(SORTENUM sortOrder)
 					m_swapCount += 1;											//入れ替えた回数を数える
 				}
 				auto excludeBegin = std::chrono::high_resolution_clock::now();	//除外処理開始時間
-				//Sleep(WAITING_TIME);											//入れ替わっていることが確認できるように待ち時間を設定する
-				//m_pParent->NumOutput(m_nSortNum, m_sortText);					//SortApplicationDlgのNumOutput()で出力する
-				DrawSortGraph(m_nSortType);									//グラフを描画する
+#if 0
+				Sleep(WAITING_TIME);											//入れ替わっていることが確認できるように待ち時間を設定する
+				m_pParent->NumOutput(m_nSortNum, m_sortText);					//SortApplicationDlgのNumOutput()で出力する
+#else
+				DrawSortGraph(m_nSortType);									//グラフを描く関数を呼び出す
+#endif
 				auto excludeEnd = std::chrono::high_resolution_clock::now();	//除外処理終了時間
 				//除外時間の合計をループが回るたびに蓄積
 				totalExclude += std::chrono::duration_cast<std::chrono::milliseconds>(excludeEnd - excludeBegin).count();
@@ -177,15 +186,19 @@ void CGraphDlg::BubbleSort(SORTENUM sortOrder)
 		begin = std::chrono::high_resolution_clock::now();	//処理開始時間
 		for (arrayLength; arrayLength > 0; --arrayLength) {						//配列の長さ分繰り返す
 			auto lastIndex = arrayLength - 1;									//探索範囲を縮める
-			for (int baseIndex = lastIndex; baseIndex > 0; --baseIndex) {		//baseIndexが基点でlastIndexまで探索する
-				int nextIndex = baseIndex - 1;									//nextIndexにbaseIndexの次の値を代入する
-				if (m_nSortNum[baseIndex] > m_nSortNum[nextIndex]) {			//基点(baseIndex)が次点(nextIndex)より大きいとき
+			for (auto baseIndex = 0; baseIndex < lastIndex; ++baseIndex) {		//baseIndexが基点でlastIndexまで探索する
+				auto nextIndex = baseIndex + 1;									//nextIndexにbaseIndexの次の値を代入する
+				if (m_nSortNum[baseIndex] < m_nSortNum[nextIndex]) {			//基点(baseIndex)が次点(nextIndex)より大きいとき
 					std::swap(m_nSortNum[baseIndex], m_nSortNum[nextIndex]);	//基点と次点を入れ替える
 					m_swapCount += 1;
 				}
 				auto excludeBegin = std::chrono::high_resolution_clock::now();	//除外処理終了時間
-				Sleep(WAITING_TIME);
-				m_pParent->NumOutput(m_nSortNum, m_sortText);
+#if 0
+				Sleep(WAITING_TIME);											//入れ替わっていることが確認できるように待ち時間を設定する
+				m_pParent->NumOutput(m_nSortNum, m_sortText);					//SortApplicationDlgのNumOutput()で出力する
+#else
+				DrawSortGraph(m_nSortType);									//グラフを描く関数を呼び出す
+#endif
 				auto excludeEnd = std::chrono::high_resolution_clock::now();	//除外処理終了時間
 				//除外時間の合計をループが回るたびに蓄積
 				totalExclude += std::chrono::duration_cast<std::chrono::milliseconds>(excludeEnd - excludeBegin).count();
