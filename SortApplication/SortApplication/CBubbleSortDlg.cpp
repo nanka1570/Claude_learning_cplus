@@ -73,7 +73,7 @@ void CBubbleSortDlg::RadioButtonExecuteJudge()
 	// ラジオボタンの状態取得
 	int radioSelection = GetCheckedRadioButton(IDC_RADIO_BUBBLE_ASC, IDC_RADIO_BUBBLE_DESC);
 
-	CGraphDlg::SORTENUM sortType{};
+	CGraphDlg::SORTTYPEORDER sortType{};
 
 	switch (radioSelection) {
 	case IDC_RADIO_BUBBLE_ASC:

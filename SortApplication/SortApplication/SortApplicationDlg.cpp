@@ -33,6 +33,8 @@ protected:
 
 protected:
 	DECLARE_MESSAGE_MAP()
+public:
+//	virtual BOOL OnInitDialog();
 };
 
 
@@ -197,7 +199,7 @@ void CSortApplicationDlg::OnBnClickedRandom()
 LRESULT CSortApplicationDlg::OnSortSwitch(WPARAM wParam, LPARAM lParam)
 {
 	//どちらのソートが選ばれているかメッセージを受け取る
-	sortType = static_cast<CGraphDlg::SORTENUM>(wParam);
+	sortType = static_cast<CGraphDlg::SORTTYPEORDER>(wParam);
 
 	return 0;
 }
@@ -271,3 +273,4 @@ void CSortApplicationDlg::NumOutput(const std::vector<int>& array, CStatic* text
 
 	return;
 }
+

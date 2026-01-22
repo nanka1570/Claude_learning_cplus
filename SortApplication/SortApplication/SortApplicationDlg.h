@@ -49,7 +49,7 @@ protected:
 	CEdit* m_ctrlEditSwapCount = {};	//入れ替えた回数を表示するエディットボックス
 
 protected:
-	CGraphDlg::SORTENUM sortType{};		//SORTENUMのインスタンス
+	CGraphDlg::SORTTYPEORDER sortType{};		//SORTENUMのインスタンス
 
 protected:
 	void RandomNumGenerate();			//ランダムな配列を生成する関数
