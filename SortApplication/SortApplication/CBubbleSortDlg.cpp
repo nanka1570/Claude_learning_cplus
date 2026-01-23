@@ -1,4 +1,4 @@
-// CBubbleSortDlg.cpp : À‘•ƒtƒ@ƒCƒ‹
+// CBubbleSortDlg.cpp : å®Ÿè£…ãƒ•ã‚¡ã‚¤ãƒ«
 //
 #include "pch.h"
 #include "Resource.h"
@@ -7,7 +7,7 @@
 #include "CBubbleSortDlg.h"
 #include "GraphDlg.h"
 
-// CBubbleSortDlg ƒ_ƒCƒAƒƒO
+// CBubbleSortDlg ãƒ€ã‚¤ã‚¢ãƒ­ã‚°
 
 IMPLEMENT_DYNAMIC(CBubbleSortDlg, CDialogEx)
 
@@ -51,26 +51,26 @@ BEGIN_MESSAGE_MAP(CBubbleSortDlg, CDialogEx)
 END_MESSAGE_MAP()
 
 
-// CBubbleSortDlg ƒƒbƒZ[ƒW ƒnƒ“ƒhƒ‰[
+// CBubbleSortDlg ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ ãƒãƒ³ãƒ‰ãƒ©ãƒ¼
 void CBubbleSortDlg::OnBnClickedRadioBubbleAsc()
 {
-	//SortApplicationDlg.cpp‚ÉSORT_BUBBLE_ASC‚ğg‚¤‚æ‚¤‚ÉAƒƒbƒZ[ƒW‚ğ‘—‚é
-	RadioButtonExecuteJudge();
+	//SortApplicationDlg.cppã«SORT_BUBBLE_ASCã‚’ä½¿ã†ã‚ˆã†ã«ã€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ã‚‹
+	RadioBnExecuteJudgeBubble();
 }
 
 
 void CBubbleSortDlg::OnBnClickedRadioBubbleDesc()
 {
-	//SortApplicationDlg.cpp‚ÉSORT_BUBBLE_DESC‚ğg‚¤‚æ‚¤‚ÉAƒƒbƒZ[ƒW‚ğ‘—‚é
-	RadioButtonExecuteJudge();
+	//SortApplicationDlg.cppã«SORT_BUBBLE_DESCã‚’ä½¿ã†ã‚ˆã†ã«ã€ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ã‚‹
+	RadioBnExecuteJudgeBubble();
 }
 
 
-//¸‡E~‡‚Ç‚¿‚ç‚Ìƒ‰ƒWƒIƒ{ƒ^ƒ“‚ª‰Ÿ‚³‚ê‚½‚©ƒƒbƒZ[ƒW‚ğ‘—M‚·‚éŠÖ”
-void CBubbleSortDlg::RadioButtonExecuteJudge()
+//æ˜‡é †ãƒ»é™é †ã©ã¡ã‚‰ã®ãƒ©ã‚¸ã‚ªãƒœã‚¿ãƒ³ãŒæŠ¼ã•ã‚ŒãŸã‹ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ä¿¡ã™ã‚‹é–¢æ•°
+void CBubbleSortDlg::RadioBnExecuteJudgeBubble()
 {
 
-	// ƒ‰ƒWƒIƒ{ƒ^ƒ“‚Ìó‘Ôæ“¾
+	// ãƒ©ã‚¸ã‚ªãƒœã‚¿ãƒ³ã®çŠ¶æ…‹å–å¾—
 	int radioSelection = GetCheckedRadioButton(IDC_RADIO_BUBBLE_ASC, IDC_RADIO_BUBBLE_DESC);
 
 	CGraphDlg::SORTTYPEORDER sortType{};

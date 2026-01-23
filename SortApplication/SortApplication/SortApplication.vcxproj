@@ -184,6 +184,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="CBubbleSortDlg.h" />
+    <ClInclude Include="CQuickSortDlg.h" />
     <ClInclude Include="GraphDlg.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
@@ -194,6 +195,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CBubbleSortDlg.cpp" />
+    <ClCompile Include="CQuickSortDlg.cpp" />
     <ClCompile Include="GraphDlg.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

@@ -1,4 +1,4 @@
-﻿// SortApplicationDlg.cpp : 実装ファイル
+// SortApplicationDlg.cpp : 実装ファイル
 
 #include "pch.h"
 #include "framework.h"
@@ -6,13 +6,14 @@
 #include "SortApplicationDlg.h"
 #include "afxdialogex.h"
 #include <vector>
+#include <tchar.h>
 
 #include <algorithm>
 #include <random>
 #include <chrono>
 
 #include "CBubbleSortDlg.h"
-//#include "CQuickSortDlg.h"
+#include "CQuickSortDlg.h"
 #include "GraphDlg.h"
 
 #ifdef _DEBUG
@@ -33,8 +34,6 @@ protected:
 
 protected:
 	DECLARE_MESSAGE_MAP()
-public:
-//	virtual BOOL OnInitDialog();
 };
 
 
@@ -107,7 +106,7 @@ BOOL CSortApplicationDlg::OnInitDialog()
 	m_ctrlSortTab.InsertItem(0, _T("バブルソート"));
 	m_ctrlSortTab.InsertItem(1, _T("クイックソート"));
 	m_tabs.emplace_back(new CBubbleSortDlg(0, &m_ctrlSortTab));
-	//m_tabs.emplace_back(new CQuickSortDlg(1, &m_ctrlSortTab));
+	m_tabs.emplace_back(new CQuickSortDlg(1, &m_ctrlSortTab));
 	m_ctrlSortTab.SetCurSel(0);
 	m_tabs.at(0)->ShowWindow(SW_SHOW);
 
@@ -209,16 +208,23 @@ LRESULT CSortApplicationDlg::OnSortSwitch(WPARAM wParam, LPARAM lParam)
 //ボタンを押されたときにグラフの表示ダイアログを開く
 void CSortApplicationDlg::OnBnClickedSort()
 {
-	CGraphDlg* m_pDialog{};
-
-	if (m_pDialog != nullptr)
+#if 0
+	if (m_pDialog != nullptr) {
 		m_pDialog->ShowWindow(SW_HIDE);
-
+	}
 	m_pDialog = new CGraphDlg(this, sortType, m_sortNum);
 	m_pDialog->Create(IDD_GRAPH_DIALOG);
 	m_pDialog->ShowWindow(SW_SHOW);
 	m_pDialog->PostMessage(WM_VIEWSORT, 0, 0);
 	//SortSwitch(sortType);
+#else
+	if (m_pDialog == nullptr) {
+		m_pDialog = new CGraphDlg(this, sortType, m_sortNum);
+		m_pDialog->Create(IDD_GRAPH_DIALOG);
+		m_pDialog->ShowWindow(SW_SHOW);
+	}
+	m_pDialog->PostMessage(WM_VIEWSORT, 0, 0);
+#endif
 }
 
 
@@ -273,4 +279,3 @@ void CSortApplicationDlg::NumOutput(const std::vector<int>& array, CStatic* text
 
 	return;
 }
-

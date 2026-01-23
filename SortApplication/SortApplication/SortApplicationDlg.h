@@ -1,4 +1,4 @@
-﻿// SortApplicationDlg.h : ヘッダー ファイル
+// SortApplicationDlg.h : ヘッダー ファイル
 #pragma once
 #include <vector>
 #include "GraphDlg.h"
@@ -47,6 +47,7 @@ protected:
 	CStatic* m_randomText = {};			//並べ替え前のエディットボックス
 	CStatic* m_sortText = {};				//並べ替え後のエディットボックス
 	CEdit* m_ctrlEditSwapCount = {};	//入れ替えた回数を表示するエディットボックス
+	CGraphDlg* m_pDialog{ nullptr };	//GraphDlgのポインタ
 
 protected:
 	CGraphDlg::SORTTYPEORDER sortType{};		//SORTENUMのインスタンス

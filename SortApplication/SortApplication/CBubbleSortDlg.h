@@ -1,31 +1,32 @@
 #pragma once
 
-// CBubbleSortDlg ƒ_ƒCƒAƒƒO
+// CBubbleSortDlg ãƒ€ã‚¤ã‚¢ãƒ­ã‚°
 
 class CBubbleSortDlg : public CDialogEx
 {
 	DECLARE_DYNAMIC(CBubbleSortDlg)
 
 public:
-	explicit CBubbleSortDlg(const int tabIndex, CWnd* pParent = nullptr);   // •W€ƒRƒ“ƒXƒgƒ‰ƒNƒ^[
+	explicit CBubbleSortDlg(const int tabIndex, CWnd* pParent = nullptr);   // æ¨™æº–ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿ãƒ¼
 	virtual ~CBubbleSortDlg() noexcept;
-
-public:
-	void RadioButtonExecuteJudge();
-	// ƒ_ƒCƒAƒƒO ƒf[ƒ^
+	
+	// ãƒ€ã‚¤ã‚¢ãƒ­ã‚° ãƒ‡ãƒ¼ã‚¿
 #ifdef AFX_DESIGN_TIME
 	enum { IDD = IDD_BUBBLE_SORT_DIALOG };
 #endif
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV ƒTƒ|[ƒg
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV ã‚µãƒãƒ¼ãƒˆ
 	virtual BOOL OnInitDialog() override;
 
 protected:
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnBnClickedRadioBubbleAsc();		//¸‡ƒ‰ƒWƒIƒ{ƒ^ƒ“
-	afx_msg void OnBnClickedRadioBubbleDesc();		//~‡ƒ‰ƒWƒIƒ{ƒ^ƒ“
+	afx_msg void OnBnClickedRadioBubbleAsc();		//æ˜‡é †ãƒ©ã‚¸ã‚ªãƒœã‚¿ãƒ³
+	afx_msg void OnBnClickedRadioBubbleDesc();		//é™é †ãƒ©ã‚¸ã‚ªãƒœã‚¿ãƒ³
 
 protected:
-	int m_tabIndex;		//ƒ^ƒu‚ÌƒCƒ“ƒfƒbƒNƒX
+	void RadioBnExecuteJudgeBubble();
+
+protected:
+	int m_tabIndex;		//ã‚¿ãƒ–ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 };
