@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "afxdialogex.h"
 #include <vector>
 #include <random>
@@ -45,7 +45,7 @@ protected:
 	void SortSwitch(SORTTYPEORDER sortType);	//バブルソートとクイックソートを切り替える
 	void BubbleSort(SORTTYPEORDER sortOrder);	//昇順・降順にバブルソートで並べ替える関数
 	void QuickSort(SORTTYPEORDER sortOrder);	//昇順・降順にクイックソートで並べ替える関数
-	void RecursiveQuickSort(std::vector<int>& array);
+	void RecursiveQuickSort(int left, int right);
 	void ViewSortGraph();						//グラフを表示する関数
 	void DrawSortGraph(SORTTYPEORDER sortType);	//グラフを描く関数
 
@@ -60,5 +60,4 @@ protected:
 
 protected:
 	int m_swapCount = 0;					//ソートで入れ替えた回数が入る変数
-
 };

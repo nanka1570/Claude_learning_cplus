@@ -1,4 +1,4 @@
-// SortApplicationDlg.cpp : 実装ファイル
+﻿// SortApplicationDlg.cpp : 実装ファイル
 
 #include "pch.h"
 #include "framework.h"
@@ -109,7 +109,6 @@ BOOL CSortApplicationDlg::OnInitDialog()
 	m_tabs.emplace_back(new CQuickSortDlg(1, &m_ctrlSortTab));
 	m_ctrlSortTab.SetCurSel(0);
 	m_tabs.at(0)->ShowWindow(SW_SHOW);
-
 	return TRUE;
 }
 

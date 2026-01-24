@@ -1,4 +1,4 @@
-// GraphDlg.cpp : 実装ファイル
+﻿// GraphDlg.cpp : 実装ファイル
 //
 #include "pch.h"
 #include "SortApplication.h"
@@ -231,12 +231,9 @@ void CGraphDlg::QuickSort(SORTTYPEORDER sortOrder)
 	auto end{ std::chrono::high_resolution_clock::now() };
 	auto totalExclude{ 0LL };
 
-	switch (sortOrder) {
-	case SORT_QUICK_ASC:		//昇順のクイックソート
-	{
 		begin = std::chrono::high_resolution_clock::now();	//処理開始時間
 
-		RecursiveQuickSort(m_nSortNum);
+		RecursiveQuickSort(0, arrayLength - 1);
 
 		//auto excludeBegin = std::chrono::high_resolution_clock::now();	//除外処理終了時間
 		//DrawSortGraph(m_nSortType);										//グラフを表示する
@@ -245,13 +242,6 @@ void CGraphDlg::QuickSort(SORTTYPEORDER sortOrder)
 		//totalExclude += std::chrono::duration_cast<std::chrono::milliseconds>(excludeEnd - excludeBegin).count();
 
 		end = std::chrono::high_resolution_clock::now();	//処理終了時間
-	}
-			break;
-	case SORT_QUICK_DESC:		//降順のクイックソート
-		break;
-	default:
-		break;
-	}
 	//時間を計算
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count();
 	duration -= totalExclude;
@@ -267,33 +257,71 @@ void CGraphDlg::QuickSort(SORTTYPEORDER sortOrder)
 }
 
 
-void CGraphDlg::RecursiveQuickSort(std::vector<int>& array)
+void CGraphDlg::RecursiveQuickSort(int left, int right)
 {
-	if (array.size() < 2) {
+	//探索範囲がなくなれば終了
+	if (left >= right) {
 		return;
 	}
 
-	auto pivot = array[0];
-	std::vector<int> leftArray;
-	std::vector<int> rightArray;
+	auto pivot = m_nSortNum[left];	//配列の最初の値を基準値にする
+	auto i = left + 1;				//左側の探索インデックス
+	auto j = right;					//右側の探索インデックス
 	
-		for (auto i = 1; i < array.size(); ++i) {		//配列の長さ分繰り返す
-			
-			if (pivot < array[i]) {						//pivotより大きかったらRightに入れる
-				rightArray.push_back(array[i]);
-			}else {										//pivotより小さかったらleftに入れる
-														//ランダム配列を作るときに値が被らないようにしているためpivot = m_nSortNum[i]はありえない
-				leftArray.push_back(array[i]);
+	while (i <= j) {
+		switch (m_nSortType) {
+		case SORT_QUICK_ASC:	//昇順
+			//左端から基準値より大きい値を探す
+			for (i; i <= j; ++i) {
+				//i(左側にある大きい値)が決定
+				if (pivot < m_nSortNum[i] && i <= j) {
+					break;
+				}
 			}
+			//右端から基準値より小さい値を探す
+			for (j; i <= j; --j) {
+				//j(右側にある小さい値)が決定
+				if (pivot > m_nSortNum[j] && i <= j) {
+					break;
+				}
+			}
+			break;
+		case SORT_QUICK_DESC:	//降順
+			//左端から基準値より小さい値を探す
+			for (i; i <= j; ++i) {
+				//i(左側にある小さい値)が決定
+				if (pivot > m_nSortNum[i] && i <= j) {
+					break;
+				}
+			}
+			//右端から基準値より大きい値を探す
+			for (j; i <= j; --j) {
+				//j(右側にある大きい値)が決定
+				if (pivot < m_nSortNum[j] && i <= j) {
+					break;
+				}
+			}
+			break;
+		default:
+			break;
 		}
-		array.clear();  // ← 元の要素を削除
-		array.insert(array.end(), leftArray.begin(), leftArray.end());
-		array.push_back(pivot);
-		array.insert(array.end(), rightArray.begin(), rightArray.end());
+		if (i <= j) {
+			//左側にある大きい値と右側にある小さい値を入れ替える
+			std::swap(m_nSortNum[i], m_nSortNum[j]);
+			m_swapCount += 1;
+			++i;
+			--j;
+		}
 
-		RecursiveQuickSort(leftArray);
-		RecursiveQuickSort(rightArray);
-
-		Sleep(WAITING_TIME);
 		DrawSortGraph(m_nSortType);
-}
+	}
+		//基準値を真ん中に移動
+		std::swap(m_nSortNum[left], m_nSortNum[j]);
+		DrawSortGraph(m_nSortType);
+
+	//基準値の左側を再帰的にソート
+	RecursiveQuickSort(left, j -1);
+	//基準値の右側を再帰的にソート
+	RecursiveQuickSort(j + 1, right);
+
+}		

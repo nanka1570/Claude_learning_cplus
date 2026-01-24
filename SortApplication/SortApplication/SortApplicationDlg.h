@@ -1,4 +1,4 @@
-// SortApplicationDlg.h : ヘッダー ファイル
+﻿// SortApplicationDlg.h : ヘッダー ファイル
 #pragma once
 #include <vector>
 #include "GraphDlg.h"
@@ -50,7 +50,11 @@ protected:
 	CGraphDlg* m_pDialog{ nullptr };	//GraphDlgのポインタ
 
 protected:
-	CGraphDlg::SORTTYPEORDER sortType{};		//SORTENUMのインスタンス
+#if 1
+	CGraphDlg::SORTTYPEORDER sortType = CGraphDlg::SORT_QUICK_ASC;		//SORTENUMのインスタンス
+#else
+	CGraphDlg::SORTTYPEORDER sortType = CGraphDlg::SORT_QUICK_DESC;		//SORTENUMのインスタンス
+#endif
 
 protected:
 	void RandomNumGenerate();			//ランダムな配列を生成する関数
